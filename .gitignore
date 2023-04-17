@@ -8,6 +8,7 @@ out
 *.iml
 .directory
 local.properties
+src/nativeInterop/lmdb/
 
 .DS_Store
 .externalNativeBuild

@@ -1,5 +1,5 @@
 plugins {
-    kotlin("multiplatform") version "1.8.0"
+    kotlin("multiplatform") version "1.8.20"
 }
 
 group = "com.crowdedinnovations"
@@ -15,28 +15,51 @@ kotlin {
         withJava()
         testRuns["test"].executionTask.configure {
             useJUnitPlatform()
+            systemProperty("lmdb.native.lib", "${project.rootDir}/src/nativeInterop/lmdb/libraries/liblmdb/liblmdb.dylib")
         }
     }
     val hostOs = System.getProperty("os.name")
     val isMingwX64 = hostOs.startsWith("Windows")
     val nativeTarget = when {
-        hostOs == "Mac OS X" -> macosX64("native")
+
+        hostOs == "Mac OS X" -> macosArm64("native")
         hostOs == "Linux" -> linuxX64("native")
         isMingwX64 -> mingwX64("native")
         else -> throw GradleException("Host OS is not supported in Kotlin/Native.")
+    }.apply {
+        compilations.getByName("main") {
+            cinterops {
+                val liblmdb by creating {
+                    includeDirs.allHeaders("${project.rootDir}/src/nativeInterop/lmdb/libraries/liblmdb/")
+                }
+            }
+        }
     }
 
-    
     sourceSets {
         val commonMain by getting
         val commonTest by getting {
             dependencies {
                 implementation(kotlin("test"))
+                implementation("com.squareup.okio:okio:3.3.0")
             }
         }
-        val jvmMain by getting
+        val jvmMain by getting {
+            dependencies {
+                implementation("com.github.jnr:jnr-constants:0.10.4")
+                implementation("com.github.jnr:jnr-ffi:2.2.13")
+            }
+        }
         val jvmTest by getting
+
         val nativeMain by getting
         val nativeTest by getting
+
+        all {
+            languageSettings.apply {
+                optIn("kotlin.RequiresOptIn")
+                optIn("kotlin.ExperimentalStdlibApi")
+            }
+        }
     }
 }
