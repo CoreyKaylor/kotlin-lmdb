@@ -13,7 +13,9 @@ that starts very early with multi-platform considerations out of the way.
 val envDir = "path_to_directory_for_data"
 val env = Environment()
 env.open(envDir)
+val tx = env.beginTransaction()
 // More to come
+tx.close()
 env.close()
 ```
 

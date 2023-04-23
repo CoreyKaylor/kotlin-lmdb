@@ -123,5 +123,5 @@ enum class EnvironmentOpenOption(val option: UInt)
     NoMemInit(0x1000000u)
 }
 
-fun Iterable<EnvironmentOpenOption>.toFlags(): UInt =
-    fold(0u) { acc, value -> acc or value.option }
+infix fun EnvironmentOpenOption.or(other: EnvironmentOpenOption) = this.option or other.option
+infix fun EnvironmentOpenOption.and(other: EnvironmentOpenOption) = this.option and other.option
