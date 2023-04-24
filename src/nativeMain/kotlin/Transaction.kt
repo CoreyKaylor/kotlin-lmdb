@@ -17,7 +17,7 @@ actual class Transaction : AutoCloseable {
     }
 
     actual fun beginTransaction(options: UInt) {
-        mdb_txn_begin(env.mdbEnv.value, parentTx?.value, options, mdbTx.ptr)
+        mdb_txn_begin(env.env.value, parentTx?.value, options, mdbTx.ptr)
     }
 
     actual fun begin(options: UInt) : Transaction {

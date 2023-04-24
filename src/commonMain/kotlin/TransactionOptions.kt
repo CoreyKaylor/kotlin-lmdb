@@ -1,4 +1,4 @@
-enum class TransactionBeginOptions(val option: UInt) {
+enum class TransactionOptions(val option: UInt) {
     /**
      * Normal mode
      */
@@ -33,7 +33,7 @@ enum class TransactionBeginOptions(val option: UInt) {
     NoMetaSync(0x40000u)
 }
 
-infix fun TransactionBeginOptions.or(other: TransactionBeginOptions) = this.option or other.option
-infix fun TransactionBeginOptions.and(other: TransactionBeginOptions) = this.option and other.option
-infix fun UInt.or(other: TransactionBeginOptions) = this or other.option
-infix fun UInt.and(other: TransactionBeginOptions) = this and other.option
+infix fun TransactionOptions.or(other: TransactionOptions) = this.option or other.option
+infix fun TransactionOptions.and(other: TransactionOptions) = this.option and other.option
+infix fun UInt.or(other: TransactionOptions) = this or other.option
+infix fun UInt.and(other: TransactionOptions) = this and other.option
