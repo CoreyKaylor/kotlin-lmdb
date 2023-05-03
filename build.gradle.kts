@@ -2,7 +2,7 @@ plugins {
     kotlin("multiplatform") version "1.8.20"
 }
 
-group = "com.crowdedinnovations"
+group = "com.github.kotlin-lmdb"
 version = "1.0-SNAPSHOT"
 
 repositories {
@@ -15,7 +15,6 @@ kotlin {
         withJava()
         testRuns["test"].executionTask.configure {
             useJUnitPlatform()
-            systemProperty("lmdb.native.lib", "${project.rootDir}/src/nativeInterop/lmdb/libraries/liblmdb/liblmdb.dylib")
         }
     }
     val hostOs = System.getProperty("os.name")
@@ -30,7 +29,7 @@ kotlin {
         compilations.getByName("main") {
             cinterops {
                 val liblmdb by creating {
-                    includeDirs.allHeaders("${project.rootDir}/src/nativeInterop/lmdb/libraries/liblmdb/")
+                    includeDirs.allHeaders("/usr/local/include")
                 }
             }
         }
@@ -61,5 +60,10 @@ kotlin {
                 optIn("kotlin.ExperimentalStdlibApi")
             }
         }
+    }
+}
+tasks.withType<Test> {
+    this.testLogging {
+        this.showStandardStreams = true
     }
 }

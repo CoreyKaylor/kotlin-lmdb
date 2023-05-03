@@ -11,11 +11,13 @@ that starts very early with multi-platform considerations out of the way.
 
 ```kotlin
 val envDir = "path_to_directory_for_data"
-val env = Environment()
+val env = Env()
 env.open(envDir)
-val tx = env.beginTransaction()
-// More to come
-tx.close()
+env.beginTxn { tx ->
+    val dbi = tx.dbiOpen()
+    tx.put(dbi, "test".encodeToByteArray(), "value".encodeToByteArray())
+    tx.commit()
+}
 env.close()
 ```
 

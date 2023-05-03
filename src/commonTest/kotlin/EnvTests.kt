@@ -1,11 +1,11 @@
 import kotlin.test.Test
 
-class EnvironmentTests {
+class EnvTests {
 
     @Test
-    fun `can successfully open and close environment`() {
+    fun `env open - close`() {
         val envDir = pathCreateTestDir()
-        val env = Environment()
+        val env = Env()
         env.open(envDir)
         env.close()
     }

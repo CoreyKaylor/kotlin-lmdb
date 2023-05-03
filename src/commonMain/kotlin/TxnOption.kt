@@ -1,8 +1,4 @@
-enum class TransactionOptions(val option: UInt) {
-    /**
-     * Normal mode
-     */
-    None(0u),
+enum class TxnOption(val option: UInt) {
 
     /**
      * MDB_NOSYNC. Don't flush system buffers to disk when committing a transaction.
@@ -33,7 +29,5 @@ enum class TransactionOptions(val option: UInt) {
     NoMetaSync(0x40000u)
 }
 
-infix fun TransactionOptions.or(other: TransactionOptions) = this.option or other.option
-infix fun TransactionOptions.and(other: TransactionOptions) = this.option and other.option
-infix fun UInt.or(other: TransactionOptions) = this or other.option
-infix fun UInt.and(other: TransactionOptions) = this and other.option
+fun Iterable<TxnOption>.toFlags(): UInt =
+    fold(0u) { acc, value -> acc or value.option }

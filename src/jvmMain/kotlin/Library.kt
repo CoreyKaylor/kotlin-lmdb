@@ -9,6 +9,7 @@ import jnr.ffi.annotations.Out
 import jnr.ffi.byref.IntByReference
 import jnr.ffi.byref.NativeLongByReference
 import jnr.ffi.byref.PointerByReference
+import jnr.ffi.provider.MemoryManager
 import jnr.ffi.types.size_t
 import java.util.*
 
@@ -18,6 +19,7 @@ internal class Library {
 
         val LMDB: Lmdb
         val RUNTIME: Runtime
+        val MEMORY: MemoryManager
 
         val SHOULD_USE_LIB = Objects.nonNull(
             System.getProperty(LMDB_NATIVE_LIB_PROP)
@@ -30,10 +32,15 @@ internal class Library {
             } else {
                 Platform.getNativePlatform().mapLibraryName(LIB_NAME)
             }
-            LMDB = LibraryLoader.create(Lmdb::class.java).load(libToLoad)
+            LMDB = LibraryLoader.create(Lmdb::class.java)
+                .searchDefault()
+                .load(libToLoad)
             RUNTIME = Runtime.getRuntime(LMDB)
+            MEMORY = RUNTIME.memoryManager
         }
     }
+
+
 
     class MDB_envinfo internal constructor(runtime: Runtime?) : Struct(runtime) {
         val f0_me_mapaddr: Pointer

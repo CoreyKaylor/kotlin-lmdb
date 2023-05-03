@@ -1,10 +1,5 @@
-enum class EnvironmentOpenOption(val option: UInt)
+enum class EnvOption(val option: UInt)
 {
-    /**
-     * Default options
-     */
-    None(0u),
-
     /**
      * Use a fixed address for the mmap region.
      * This flag must be specified when creating the environment,
@@ -123,5 +118,5 @@ enum class EnvironmentOpenOption(val option: UInt)
     NoMemInit(0x1000000u)
 }
 
-infix fun EnvironmentOpenOption.or(other: EnvironmentOpenOption) = this.option or other.option
-infix fun EnvironmentOpenOption.and(other: EnvironmentOpenOption) = this.option and other.option
+fun Iterable<EnvOption>.toFlags(): UInt =
+    fold(0u) { acc, value -> acc or value.option }

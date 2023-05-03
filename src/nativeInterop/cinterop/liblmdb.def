@@ -1,5 +1,5 @@
-headers = lmdb.h mdb.c midl.c
+headers = lmdb.h
 package = lmdb
 
-compilerOpts = -Isrc/nativeInterop/lmdb/libraries/liblmdb
-linkerOpts = -Lsrc/nativeInterop/lmdb/libraries/liblmdb
+staticLibraries = liblmdb.a
+libraryPaths = /usr/local/lib

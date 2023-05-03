@@ -1,19 +1,18 @@
-import kotlinx.cinterop.toKString
+import kotlinx.cinterop.*
 import lmdb.*
+import platform.posix.memcpy
 
-internal fun check(result: Int) {
-    if(result == 0) //success
-        return
-    throwError(result)
+inline fun ByteArray.toMDB_val() : CValue<MDB_val> {
+    this.usePinned {
+        return cValue<MDB_val> {
+            mv_data = it.addressOf(0)
+            mv_size = size.toULong()
+        }
+    }
 }
 
-private fun throwError(result: Int) {
-    val error = mdb_strerror(result)!!.toKString()
-    throw LmdbException(error)
-}
-
-internal fun checkRead(result: Int) {
-    if(result == 0 || result == -30798) //success or not found
-        return
-    throwError(result)
+inline fun MDB_val.toByteArray() : ByteArray = ByteArray(this.mv_size.toInt()).apply {
+    usePinned {
+        memcpy(it.addressOf(0), this@toByteArray.mv_data, this@toByteArray.mv_size)
+    }
 }
