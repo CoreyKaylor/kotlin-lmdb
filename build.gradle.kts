@@ -1,5 +1,5 @@
 plugins {
-    kotlin("multiplatform") version "1.8.20"
+    kotlin("multiplatform") version "2.0.20"
 }
 
 group = "com.github.kotlin-lmdb"
@@ -7,11 +7,12 @@ version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
+    maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlinx/dev")
 }
 
 kotlin {
+    jvmToolchain(11)
     jvm {
-        jvmToolchain(11)
         withJava()
         testRuns["test"].executionTask.configure {
             useJUnitPlatform()
@@ -19,8 +20,7 @@ kotlin {
     }
     val hostOs = System.getProperty("os.name")
     val isMingwX64 = hostOs.startsWith("Windows")
-    val nativeTarget = when {
-
+    when {
         hostOs == "Mac OS X" -> macosArm64("native")
         hostOs == "Linux" -> linuxX64("native")
         isMingwX64 -> mingwX64("native")
@@ -29,7 +29,7 @@ kotlin {
         compilations.getByName("main") {
             cinterops {
                 val liblmdb by creating {
-                    includeDirs.allHeaders("/usr/local/include")
+                    includeDirs.allHeaders("${project.rootDir}/src/nativeInterop/lmdb/libraries/liblmdb/")
                 }
             }
         }
@@ -40,7 +40,7 @@ kotlin {
         val commonTest by getting {
             dependencies {
                 implementation(kotlin("test"))
-                implementation("com.squareup.okio:okio:3.3.0")
+                implementation("org.jetbrains.kotlinx:kotlinx-io-core:0.5.4")
             }
         }
         val jvmMain by getting {
@@ -56,8 +56,8 @@ kotlin {
 
         all {
             languageSettings.apply {
-                optIn("kotlin.RequiresOptIn")
-                optIn("kotlin.ExperimentalStdlibApi")
+                optIn("kotlinx.cinterop.ExperimentalForeignApi")
+                optIn("kotlinx.io.core.ExperimentalIO")
             }
         }
     }

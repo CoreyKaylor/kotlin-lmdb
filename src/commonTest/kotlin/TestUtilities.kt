@@ -1,5 +1,4 @@
-import okio.FileSystem
-import okio.Path.Companion.toPath
+import kotlinx.io.files.*
 
 fun pathCreateTestDir() : String {
     fun getRandomString(length: Int) : String {
@@ -9,17 +8,14 @@ fun pathCreateTestDir() : String {
             .joinToString("")
     }
 
-    val fs = getFileSystem()
-    val directoryPath = "./build".toPath()
-    var testPath = fs.canonicalize(directoryPath) / "lmdb-envs"
-    if (!fs.exists(testPath)) {
-        fs.createDirectory(testPath, true)
+    val fs = SystemFileSystem
+    val directoryPath = Path("./build", "lmdb-envs")
+    if (!fs.exists(directoryPath)) {
+        fs.createDirectories(directoryPath, true)
     }
-    testPath /= getRandomString(10)
+    val testPath = Path(directoryPath.toString(), getRandomString(10))
     if (!fs.exists(testPath)) {
-        fs.createDirectory(testPath, true)
+        fs.createDirectories(testPath, true)
     }
     return testPath.toString()
 }
-
-expect fun getFileSystem(): FileSystem

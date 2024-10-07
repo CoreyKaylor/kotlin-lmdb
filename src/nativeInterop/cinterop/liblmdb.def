@@ -1,4 +1,4 @@
-headers = lmdb.h
+headers = lmdb.h mdb.c
 package = lmdb
 
 staticLibraries = liblmdb.a

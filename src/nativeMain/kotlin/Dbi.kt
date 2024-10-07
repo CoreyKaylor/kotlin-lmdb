@@ -2,19 +2,21 @@ import kotlinx.cinterop.*
 import lmdb.*
 
 actual class Dbi actual constructor(name: String?, tx: Txn, vararg options: DbiOption) {
-    private var dbiPtr: CValue<MDB_dbiVar> = cValue<MDB_dbiVar>()
+    private val arena = Arena()
+    private val dbiPtr = arena.alloc<MDB_dbiVar>()
     internal val dbi: MDB_dbi
 
+
     init {
-        check(mdb_dbi_open(tx.ptr, name, options.asIterable().toFlags(), dbiPtr))
-        dbi = memScoped {
-            dbiPtr.ptr[0]
-        }
+        check(mdb_dbi_open(tx.ptr, name, options.asIterable().toFlags(), dbiPtr.ptr))
+        dbi = dbiPtr.ptr.pointed.value
     }
 
     actual fun stat(tx: Txn) : Stat {
         val statPtr: CValue<MDB_stat> = cValue<MDB_stat>()
-        check(mdb_stat(tx.ptr, dbi, statPtr))
+        memScoped {
+            check(mdb_stat(tx.ptr, dbi, statPtr))
+        }
         val pointed = memScoped {
             statPtr.ptr.pointed
         }

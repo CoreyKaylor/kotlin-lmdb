@@ -3,18 +3,21 @@ import kotlinx.cinterop.*
 import lmdb.*
 
 actual class Txn internal actual constructor(env: Env, parent: Txn?, vararg options: TxnOption) : AutoCloseable {
+    private val arena = Arena()
     private val env: Env
     private val parentTx: CPointer<MDB_txn>?
-    private var mdbTx: CPointerVar<MDB_txn> = memScoped { allocPointerTo() }
     internal val ptr: CPointer<MDB_txn>
     internal actual var state: TxnState
+    private var isClosed = false
+
     internal actual constructor(env: Env, vararg options: TxnOption) : this(env, null, *options)
 
     init {
         this.env = env
         parentTx = parent?.ptr
-        check(mdb_txn_begin(env.ptr, parentTx, options.asIterable().toFlags(), mdbTx.ptr))
-        ptr = mdbTx.value!!.pointed.ptr
+        val ptrVar = arena.allocPointerTo<MDB_txn>()
+        check(mdb_txn_begin(env.ptr, parent?.ptr, options.asIterable().toFlags(), ptrVar.ptr))
+        ptr = checkNotNull(ptrVar.value)
         state = Ready
     }
 
@@ -55,22 +58,26 @@ actual class Txn internal actual constructor(env: Env, parent: Txn?, vararg opti
         return Dbi(name, this, *options)
     }
 
-    actual fun get(dbi: Dbi, key: ByteArray) : Result {
-        val mdbKey = key.toMDB_val()
-        val mdbVal = cValue<MDB_val>()
-        return memScoped {
-            val code = checkRead(mdb_get(ptr, dbi.dbi, mdbKey, mdbVal))
-            Result(code, mdbKey.ptr.pointed, mdbVal.ptr.pointed)
+    actual fun get(dbi: Dbi, key: ByteArray) : Result = memScoped {
+        return toPinnedMDB_val(key) { mdbKey ->
+            val mdbData = cValue<MDB_val>()
+            val code = checkRead(mdb_get(ptr, dbi.dbi, mdbKey.ptr, mdbData.ptr))
+            Result(code, mdbKey, mdbData.ptr.pointed)
         }
     }
 
     actual fun put(dbi: Dbi, key: ByteArray, data: ByteArray, vararg options: PutOption) {
-        val mdbKey = key.toMDB_val()
-        val mdbData = data.toMDB_val()
-        check(mdb_put(ptr, dbi.dbi, mdbKey, mdbData, options.asIterable().toFlags()))
+        memScoped {
+            toPinnedMDB_val(key, data) {mdbKey, mdbData ->
+                check(mdb_put(ptr, dbi.dbi, mdbKey.ptr, mdbData.ptr, options.asIterable().toFlags()))
+            }
+        }
     }
 
     actual override fun close() {
+        if(isClosed)
+            return
+        isClosed = true
         if(state == Released) {
             return
         }

@@ -23,7 +23,7 @@ expect class Env() : AutoCloseable {
     override fun close()
 }
 
-inline fun Env.beginTxn(vararg options: TxnOption, crossinline block: (Txn) -> Unit) {
+inline fun Env.beginTxn(vararg options: TxnOption, crossinline block: Txn.() -> Unit) {
     beginTxn(*options).use {
         block(it)
     }

@@ -2,15 +2,20 @@ import kotlinx.cinterop.*
 import lmdb.*
 
 actual class Env : AutoCloseable {
-    private val envPtr: CPointerVar<MDB_env> = memScoped { allocPointerTo() }
     internal val ptr: CPointer<MDB_env>
 
     init {
-        check(mdb_env_create(envPtr.ptr))
-        ptr = envPtr.value!!
+        ptr = memScoped {
+            val ptrVar = allocPointerTo<MDB_env>()
+            check(mdb_env_create(ptrVar.ptr))
+            checkNotNull(ptrVar.value)
+        }
     }
 
+
+
     private var isOpened = false
+    private var isClosed = false
 
     actual var maxDatabases: UInt = 0u
         set(value) {
@@ -55,8 +60,8 @@ actual class Env : AutoCloseable {
         }
 
     actual fun open(path: String, vararg options: EnvOption, mode: UShort) {
-        check(mdb_env_open(ptr, path, options.asIterable().toFlags(), mode))
         isOpened = true
+        check(mdb_env_open(ptr, path, options.asIterable().toFlags(), mode))
     }
 
     actual fun beginTxn(vararg options: TxnOption) : Txn {
@@ -78,8 +83,11 @@ actual class Env : AutoCloseable {
     }
 
     actual override fun close() {
-        if (!isOpened)
+        if (isClosed)
             return
-        mdb_env_close(ptr)
+        if (isOpened) {
+            mdb_env_close(ptr)
+        }
+        isClosed = true
     }
 }
