@@ -62,7 +62,7 @@ actual class Txn internal actual constructor(env: Env, parent: Txn?, vararg opti
         return withMDB_val(key) { mdbKey ->
             val mdbData = alloc<MDB_val>()
             val code = checkRead(mdb_get(ptr, dbi.dbi, mdbKey.ptr, mdbData.ptr))
-            Result(code, mdbKey, mdbData)
+            Result(code, key, mdbData.toByteArray())
         }
     }
 
