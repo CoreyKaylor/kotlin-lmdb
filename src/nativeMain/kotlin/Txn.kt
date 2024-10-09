@@ -59,18 +59,16 @@ actual class Txn internal actual constructor(env: Env, parent: Txn?, vararg opti
     }
 
     actual fun get(dbi: Dbi, key: ByteArray) : Result = memScoped {
-        return toPinnedMDB_val(key) { mdbKey ->
-            val mdbData = cValue<MDB_val>()
+        return withMDB_val(key) { mdbKey ->
+            val mdbData = alloc<MDB_val>()
             val code = checkRead(mdb_get(ptr, dbi.dbi, mdbKey.ptr, mdbData.ptr))
-            Result(code, mdbKey, mdbData.ptr.pointed)
+            Result(code, mdbKey, mdbData)
         }
     }
 
-    actual fun put(dbi: Dbi, key: ByteArray, data: ByteArray, vararg options: PutOption) {
-        memScoped {
-            toPinnedMDB_val(key, data) {mdbKey, mdbData ->
-                check(mdb_put(ptr, dbi.dbi, mdbKey.ptr, mdbData.ptr, options.asIterable().toFlags()))
-            }
+    actual fun put(dbi: Dbi, key: ByteArray, data: ByteArray, vararg options: PutOption) : Unit = memScoped {
+        withMDB_val(key, data) { mdbKey, mdbData ->
+            check(mdb_put(ptr, dbi.dbi, mdbKey.ptr, mdbData.ptr, options.asIterable().toFlags()))
         }
     }
 
