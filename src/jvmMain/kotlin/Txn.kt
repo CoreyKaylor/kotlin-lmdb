@@ -83,4 +83,23 @@ actual class Txn internal actual constructor(env: Env, parent: Txn?, vararg opti
         }
         state = Released
     }
+
+    actual fun drop(dbi: Dbi) {
+        check(LMDB.mdb_drop(ptr, dbi.ptr, 1))
+    }
+
+    actual fun empty(dbi: Dbi) {
+        check(LMDB.mdb_drop(ptr, dbi.ptr, 0))
+    }
+
+    actual fun delete(dbi: Dbi, key: ByteArray) {
+        val mdbKey = MDBVal.input(key)
+        check(LMDB.mdb_del(ptr, dbi.ptr, mdbKey.ptr, null))
+    }
+
+    actual fun delete(dbi: Dbi, key: ByteArray, data: ByteArray) {
+        val mdbKey = MDBVal.input(key)
+        val mdbData = MDBVal.input(data)
+        check(LMDB.mdb_del(ptr, dbi.ptr, mdbKey.ptr, mdbData.ptr))
+    }
 }

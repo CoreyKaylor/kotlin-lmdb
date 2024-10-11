@@ -84,4 +84,24 @@ actual class Txn internal actual constructor(env: Env, parent: Txn?, vararg opti
         }
         state = Released
     }
+
+    actual fun drop(dbi: Dbi) {
+        check(mdb_drop(ptr, dbi.dbi, 1))
+    }
+
+    actual fun empty(dbi: Dbi) {
+        check(mdb_drop(ptr, dbi.dbi, 0))
+    }
+
+    actual fun delete(dbi: Dbi, key: ByteArray) : Unit = memScoped {
+        withMDB_val(key) { mdbKey ->
+            check(mdb_del(ptr, dbi.dbi, mdbKey.ptr, null))
+        }
+    }
+
+    actual fun delete(dbi: Dbi, key: ByteArray, data: ByteArray) : Unit = memScoped {
+        withMDB_val(key, data) { mdbKey, mdbData ->
+            check(mdb_del(ptr, dbi.dbi, mdbKey.ptr, mdbData.ptr))
+        }
+    }
 }

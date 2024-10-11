@@ -16,9 +16,17 @@ expect class Txn : AutoCloseable {
 
     fun dbiOpen(name: String? = null, vararg options: DbiOption) : Dbi
 
+    fun drop(dbi: Dbi)
+
+    fun empty(dbi: Dbi)
+
     fun get(dbi: Dbi, key: ByteArray) : Result
 
     fun put(dbi: Dbi, key: ByteArray, data: ByteArray, vararg options: PutOption)
+
+    fun delete(dbi: Dbi, key: ByteArray)
+
+    fun delete(dbi: Dbi, key: ByteArray, data: ByteArray)
 
     override fun close()
 }
