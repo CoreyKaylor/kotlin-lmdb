@@ -74,6 +74,10 @@ actual class Txn internal actual constructor(env: Env, parent: Txn?, vararg opti
             options.asIterable().toFlags().toInt()))
     }
 
+    actual fun openCursor(dbi: Dbi): Cursor {
+        return Cursor(this, dbi)
+    }
+
     actual override fun close() {
         if(state == Released) {
             return

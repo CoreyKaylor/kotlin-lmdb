@@ -28,6 +28,8 @@ expect class Txn : AutoCloseable {
 
     fun delete(dbi: Dbi, key: ByteArray, data: ByteArray)
 
+    fun openCursor(dbi: Dbi) : Cursor
+
     override fun close()
 }
 
