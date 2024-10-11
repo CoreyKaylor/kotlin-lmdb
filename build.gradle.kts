@@ -11,6 +11,9 @@ repositories {
 }
 
 kotlin {
+    compilerOptions {
+        freeCompilerArgs.add("-Xexpect-actual-classes")
+    }
     jvmToolchain(11)
     jvm {
         withJava()
