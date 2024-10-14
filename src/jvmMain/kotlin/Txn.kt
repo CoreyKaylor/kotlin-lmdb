@@ -15,6 +15,7 @@ actual class Txn internal actual constructor(env: Env, parent: Txn?, vararg opti
     internal actual constructor(env: Env, vararg options: TxnOption) : this(env, null, *options)
 
     init {
+        if(!env.isOpened) throw LmdbException("Env is not open")
         this.env = env
         parentTx = parent?.ptr
         check(LMDB.mdb_txn_begin(env.ptr, parentTx, options.asIterable().toFlags().toInt(), txnPtr))

@@ -11,6 +11,14 @@ actual class Env : AutoCloseable {
         ptr = envPtr.value
     }
 
+    private var _isOpened = false
+    var isOpened: Boolean
+        get() = _isOpened
+        private set(value) {
+            _isOpened = value
+        }
+    private var isClosed = false
+
     actual var maxDatabases: UInt = 0u
         set(value) {
             LMDB.mdb_env_set_maxdbs(ptr, value.toInt())
@@ -48,6 +56,7 @@ actual class Env : AutoCloseable {
         }
 
     actual fun open(path: String, vararg options: EnvOption, mode: UShort) {
+        isOpened = true
         check(LMDB.mdb_env_open(ptr, path, options.asIterable().toFlags().toInt(), mode.toInt()))
     }
 
@@ -70,6 +79,12 @@ actual class Env : AutoCloseable {
     }
 
     actual override fun close() {
-        LMDB.mdb_env_close(ptr)
+        if (isClosed)
+            return
+        if (isOpened) {
+            LMDB.mdb_env_close(ptr)
+        }
+        isOpened = false
+        isClosed = true
     }
 }

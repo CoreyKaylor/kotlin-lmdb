@@ -5,13 +5,13 @@ class DatabaseTests {
 
     @Test
     fun `stats can be read`() {
-        val path = pathCreateTestDir()
-        val env = Env()
-        env.open(path)
-        env.beginTxn {
-            val dbi = dbiOpen()
-            val stat = dbi.stat(this)
-            assertEquals(stat.entries, 0u)
+        val env = createRandomTestEnv()
+        env.use {
+            env.beginTxn {
+                val dbi = dbiOpen()
+                val stat = dbi.stat(this)
+                assertEquals(stat.entries, 0u)
+            }
         }
     }
 }

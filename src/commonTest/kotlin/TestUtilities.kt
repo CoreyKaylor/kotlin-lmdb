@@ -19,3 +19,12 @@ fun pathCreateTestDir() : String {
     }
     return testPath.toString()
 }
+
+fun createRandomTestEnv(open: Boolean = true) : Env {
+    val path = pathCreateTestDir()
+    val env = Env()
+    if (open) {
+        env.open(path)
+    }
+    return env
+}

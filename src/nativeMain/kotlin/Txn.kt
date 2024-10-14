@@ -12,6 +12,7 @@ actual class Txn internal actual constructor(private val env: Env, parent: Txn?,
     internal actual constructor(env: Env, vararg options: TxnOption) : this(env, null, *options)
 
     init {
+        if(!env.isOpened) throw LmdbException("Env is not open")
         parentTx = parent?.ptr
         val ptrVar = arena.allocPointerTo<MDB_txn>()
         check(mdb_txn_begin(env.ptr, parent?.ptr, options.asIterable().toFlags(), ptrVar.ptr))

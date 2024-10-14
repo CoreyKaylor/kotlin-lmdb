@@ -13,8 +13,12 @@ actual class Env : AutoCloseable {
     }
 
 
-
-    private var isOpened = false
+    private var _isOpened = false
+    var isOpened: Boolean
+        get() = _isOpened
+        private set(value) {
+            _isOpened = value
+        }
     private var isClosed = false
 
     actual var maxDatabases: UInt = 0u
