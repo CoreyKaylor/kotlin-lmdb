@@ -20,18 +20,27 @@ expect class Txn : AutoCloseable {
 
     fun empty(dbi: Dbi)
 
-    fun get(dbi: Dbi, key: ByteArray) : Result
+    fun get(dbi: Dbi, key: Val) : Triple<Int,Val,Val>
 
-    fun put(dbi: Dbi, key: ByteArray, data: ByteArray, vararg options: PutOption)
+    fun put(dbi: Dbi, key: Val, data: Val, vararg options: PutOption)
 
-    fun delete(dbi: Dbi, key: ByteArray)
+    fun delete(dbi: Dbi, key: Val)
 
-    fun delete(dbi: Dbi, key: ByteArray, data: ByteArray)
+    fun delete(dbi: Dbi, key: Val, data: Val)
 
     fun openCursor(dbi: Dbi) : Cursor
 
     override fun close()
 }
+
+fun Txn.get(dbi: Dbi, key: ByteArray) = this.get(dbi, key.toVal())
+
+fun Txn.put(dbi: Dbi, key: ByteArray, data: ByteArray, vararg options: PutOption) =
+    this.put(dbi, key.toVal(), data.toVal(), *options)
+
+fun Txn.delete(dbi: Dbi, key: ByteArray) = this.delete(dbi, key.toVal())
+
+fun Txn.delete(dbi: Dbi, key: ByteArray, data: ByteArray) = this.delete(dbi, key.toVal(), data.toVal())
 
 fun Txn.checkReady() {
     if (this.state != TxnState.Ready) {

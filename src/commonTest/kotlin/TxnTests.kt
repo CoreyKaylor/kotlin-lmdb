@@ -16,8 +16,8 @@ class TxnTests {
             commit()
         }
         env.beginTxn {
-            val result = get(dbi!!, "test".encodeToByteArray())
-            val value = result.toDataByteArray()?.decodeToString()
+            val (_, _, result) = get(dbi!!, "test".encodeToByteArray())
+            val value = result.toByteArray()?.decodeToString()
             assertEquals(expected, value)
         }
     }

@@ -2,9 +2,8 @@ import TxnState.*
 import kotlinx.cinterop.*
 import lmdb.*
 
-actual class Txn internal actual constructor(env: Env, parent: Txn?, vararg options: TxnOption) : AutoCloseable {
+actual class Txn internal actual constructor(private val env: Env, parent: Txn?, vararg options: TxnOption) : AutoCloseable {
     private val arena = Arena()
-    private val env: Env
     private val parentTx: CPointer<MDB_txn>?
     internal val ptr: CPointer<MDB_txn>
     internal actual var state: TxnState
@@ -13,7 +12,6 @@ actual class Txn internal actual constructor(env: Env, parent: Txn?, vararg opti
     internal actual constructor(env: Env, vararg options: TxnOption) : this(env, null, *options)
 
     init {
-        this.env = env
         parentTx = parent?.ptr
         val ptrVar = arena.allocPointerTo<MDB_txn>()
         check(mdb_txn_begin(env.ptr, parent?.ptr, options.asIterable().toFlags(), ptrVar.ptr))
@@ -58,18 +56,14 @@ actual class Txn internal actual constructor(env: Env, parent: Txn?, vararg opti
         return Dbi(name, this, *options)
     }
 
-    actual fun get(dbi: Dbi, key: ByteArray) : Result = memScoped {
-        return withMDB_val(key) { mdbKey ->
-            val mdbData = alloc<MDB_val>()
-            val code = checkRead(mdb_get(ptr, dbi.dbi, mdbKey.ptr, mdbData.ptr))
-            Result(code, key, mdbData.toByteArray())
-        }
+    actual fun get(dbi: Dbi, key: Val) : Triple<Int, Val, Val> {
+        val mdbData = Val.output()
+        val code = mdb_get(ptr, dbi.dbi, key.mdbVal.ptr, mdbData.mdbVal.ptr)
+        return buildReadResult(code, key, mdbData)
     }
 
-    actual fun put(dbi: Dbi, key: ByteArray, data: ByteArray, vararg options: PutOption) : Unit = memScoped {
-        withMDB_val(key, data) { mdbKey, mdbData ->
-            check(mdb_put(ptr, dbi.dbi, mdbKey.ptr, mdbData.ptr, options.asIterable().toFlags()))
-        }
+    actual fun put(dbi: Dbi, key: Val, data: Val, vararg options: PutOption) {
+        check(mdb_put(ptr, dbi.dbi, key.mdbVal.ptr, data.mdbVal.ptr, options.asIterable().toFlags()))
     }
 
     actual fun openCursor(dbi: Dbi): Cursor {
@@ -97,15 +91,11 @@ actual class Txn internal actual constructor(env: Env, parent: Txn?, vararg opti
         check(mdb_drop(ptr, dbi.dbi, 0))
     }
 
-    actual fun delete(dbi: Dbi, key: ByteArray) : Unit = memScoped {
-        withMDB_val(key) { mdbKey ->
-            check(mdb_del(ptr, dbi.dbi, mdbKey.ptr, null))
-        }
+    actual fun delete(dbi: Dbi, key: Val) {
+        check(mdb_del(ptr, dbi.dbi, key.mdbVal.ptr, null))
     }
 
-    actual fun delete(dbi: Dbi, key: ByteArray, data: ByteArray) : Unit = memScoped {
-        withMDB_val(key, data) { mdbKey, mdbData ->
-            check(mdb_del(ptr, dbi.dbi, mdbKey.ptr, mdbData.ptr))
-        }
+    actual fun delete(dbi: Dbi, key: Val, data: Val) {
+        check(mdb_del(ptr, dbi.dbi, key.mdbVal.ptr, data.mdbVal.ptr))
     }
 }

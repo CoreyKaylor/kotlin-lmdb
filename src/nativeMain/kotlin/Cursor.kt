@@ -13,26 +13,27 @@ actual class Cursor(txn: Txn, dbi: Dbi) : AutoCloseable {
         }
     }
 
-    internal actual fun get(option: CursorOption) : Result = memScoped {
-        val key = alloc<MDB_val>()
-        val data = alloc<MDB_val>()
-        val result = checkRead(mdb_cursor_get(ptr, key.ptr, data.ptr, MDB_cursor_op.byValue(option.option)))
-        return Result(result, key.toByteArray(), data.toByteArray())
+    internal actual fun get(option: CursorOption) : Triple<Int,Val,Val> {
+        val key = Val.output()
+        val data = Val.output()
+        val result = mdb_cursor_get(ptr, key.mdbVal.ptr, data.mdbVal.ptr, MDB_cursor_op.byValue(option.option))
+        return buildReadResult(result, key, data)
     }
 
-    internal actual fun get(key: ByteArray, option: CursorOption) : Result = memScoped {
-        withMDB_val(key) { mdbKey ->
-            val data = alloc<MDB_val>()
-            val result = checkRead(mdb_cursor_get(ptr, mdbKey.ptr, data.ptr, MDB_cursor_op.byValue(option.option)))
-            Result(result, key, data.toByteArray())
-        }
+    internal actual fun get(key: Val, option: CursorOption): Triple<Int, Val, Val> {
+        val mdbData = Val.output()
+        val result = mdb_cursor_get(ptr, key.mdbVal.ptr, mdbData.mdbVal.ptr, MDB_cursor_op.byValue(option.option))
+        return buildReadResult(result, key, mdbData)
     }
 
-    internal actual fun get(key: ByteArray, data: ByteArray, option: CursorOption) : Result = memScoped {
-        withMDB_val(key, data) { mdbKey, mdbData ->
-            val result = checkRead(mdb_cursor_get(ptr, mdbKey.ptr, mdbData.ptr, MDB_cursor_op.byValue(option.option)))
-            Result(result, key, mdbData.toByteArray())
-        }
+    internal actual fun get(key: Val, data: Val, option: CursorOption): Triple<Int, Val, Val> {
+        val result = mdb_cursor_get(ptr, key.mdbVal.ptr, data.mdbVal.ptr, MDB_cursor_op.byValue(option.option))
+        return buildReadResult(result, key, data)
+    }
+
+    internal actual fun put(key: Val, data: Val, option: CursorPutOption): Triple<Int, Val, Val> {
+        val result = mdb_cursor_put(ptr, key.mdbVal.ptr, data.mdbVal.ptr, option.option)
+        return buildReadResult(result, key, data)
     }
 
     actual fun delete() {
@@ -41,13 +42,6 @@ actual class Cursor(txn: Txn, dbi: Dbi) : AutoCloseable {
 
     actual fun deleteDuplicateData() {
         check(mdb_cursor_del(ptr, CursorDeleteOption.NO_DUP_DATA.option))
-    }
-
-    internal actual fun put(key: ByteArray, data: ByteArray, option: CursorPutOption): Result = memScoped {
-        withMDB_val(key, data) { mdbKey, mdbData ->
-            val result = check(mdb_cursor_put(ptr, mdbKey.ptr, mdbData.ptr, option.option))
-            Result(result, key, data)
-        }
     }
 
     actual override fun close() {

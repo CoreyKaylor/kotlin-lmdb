@@ -12,25 +12,22 @@ actual class Cursor(txn: Txn, dbi: Dbi) : AutoCloseable {
         ptr = csrPtr.value
     }
 
-    internal actual fun get(option: CursorOption): Result {
+    internal actual fun get(option: CursorOption): Triple<Int, Val, Val> {
         val key = MDBVal.output()
         val data = MDBVal.output()
-        val result = checkRead(LMDB.mdb_cursor_get(ptr, key.ptr, data.ptr, option.option.toInt()))
-        return Result(result, key, data)
+        val result = LMDB.mdb_cursor_get(ptr, key.ptr, data.ptr, option.option.toInt())
+        return buildReadResult(result, Val.fromMDBVal(key), Val.fromMDBVal(data))
     }
 
-    internal actual fun get(key: ByteArray, option: CursorOption): Result {
-        val mdbKey = MDBVal.input(key)
+    internal actual fun get(key: Val, option: CursorOption): Triple<Int, Val, Val> {
         val data = MDBVal.output()
-        val result = checkRead(LMDB.mdb_cursor_get(ptr, mdbKey.ptr, data.ptr, option.option.toInt()))
-        return Result(result, mdbKey, data)
+        val result = LMDB.mdb_cursor_get(ptr, key.mdbVal.ptr, data.ptr, option.option.toInt())
+        return buildReadResult(result, key, Val.fromMDBVal(data))
     }
 
-    internal actual fun get(key: ByteArray, data: ByteArray, option: CursorOption): Result {
-        val mdbKey = MDBVal.input(key)
-        val mdbData = MDBVal.input(data)
-        val result = checkRead(LMDB.mdb_cursor_get(ptr, mdbKey.ptr, mdbData.ptr, option.option.toInt()))
-        return Result(result, mdbKey, mdbData)
+    internal actual fun get(key: Val, data: Val, option: CursorOption): Triple<Int, Val, Val> {
+        val result = LMDB.mdb_cursor_get(ptr, key.mdbVal.ptr, data.mdbVal.ptr, option.option.toInt())
+        return buildReadResult(result, key, data)
     }
 
     actual fun delete() {
@@ -41,11 +38,9 @@ actual class Cursor(txn: Txn, dbi: Dbi) : AutoCloseable {
         check(LMDB.mdb_cursor_del(ptr, CursorDeleteOption.NO_DUP_DATA.option.toInt()))
     }
 
-    internal actual fun put(key: ByteArray, data: ByteArray, option: CursorPutOption): Result {
-        val mdbKey = MDBVal.input(key)
-        val mdbData = MDBVal.input(data)
-        val result = check(LMDB.mdb_cursor_put(ptr, mdbKey.ptr, mdbData.ptr, option.option.toInt()))
-        return Result(result, mdbKey, mdbData)
+    internal actual fun put(key: Val, data: Val, option: CursorPutOption): Triple<Int, Val, Val> {
+        val result = LMDB.mdb_cursor_put(ptr, key.mdbVal.ptr, data.mdbVal.ptr, option.option.toInt())
+        return buildResult(result, key, data)
     }
 
     actual override fun close() {

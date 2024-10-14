@@ -1,5 +1,4 @@
 import Library.Companion.LMDB
-import Library.*
 import Library.Companion.RUNTIME
 import TxnState.*
 import jnr.ffi.Memory.allocateDirect
@@ -60,17 +59,14 @@ actual class Txn internal actual constructor(env: Env, parent: Txn?, vararg opti
         return Dbi(name, this, *options)
     }
 
-    actual fun get(dbi: Dbi, key: ByteArray) : Result {
-        val keyPtr = MDBVal.input(key)
-        val dataPtr = MDBVal.output()
-        val resultCode = check(LMDB.mdb_get(ptr, dbi.ptr, keyPtr.ptr, dataPtr.ptr))
-        return Result(resultCode, keyPtr, dataPtr)
+    actual fun get(dbi: Dbi, key: Val) : Triple<Int, Val, Val> {
+        val data = MDBVal.output()
+        val resultCode = LMDB.mdb_get(ptr, dbi.ptr, key.mdbVal.ptr, data.ptr)
+        return buildResult(resultCode, key, Val.fromMDBVal(data))
     }
 
-    actual fun put(dbi: Dbi, key: ByteArray, data: ByteArray, vararg options: PutOption) {
-        val keyPtr = MDBVal.input(key)
-        val dataPtr = MDBVal.input(data)
-        check(LMDB.mdb_put(ptr, dbi.ptr, keyPtr.ptr, dataPtr.ptr,
+    actual fun put(dbi: Dbi, key: Val, data: Val, vararg options: PutOption) {
+        check(LMDB.mdb_put(ptr, dbi.ptr, key.mdbVal.ptr, data.mdbVal.ptr,
             options.asIterable().toFlags().toInt()))
     }
 
@@ -96,14 +92,11 @@ actual class Txn internal actual constructor(env: Env, parent: Txn?, vararg opti
         check(LMDB.mdb_drop(ptr, dbi.ptr, 0))
     }
 
-    actual fun delete(dbi: Dbi, key: ByteArray) {
-        val mdbKey = MDBVal.input(key)
-        check(LMDB.mdb_del(ptr, dbi.ptr, mdbKey.ptr, null))
+    actual fun delete(dbi: Dbi, key: Val) {
+        check(LMDB.mdb_del(ptr, dbi.ptr, key.mdbVal.ptr, null))
     }
 
-    actual fun delete(dbi: Dbi, key: ByteArray, data: ByteArray) {
-        val mdbKey = MDBVal.input(key)
-        val mdbData = MDBVal.input(data)
-        check(LMDB.mdb_del(ptr, dbi.ptr, mdbKey.ptr, mdbData.ptr))
+    actual fun delete(dbi: Dbi, key: Val, data: Val) {
+        check(LMDB.mdb_del(ptr, dbi.ptr, key.mdbVal.ptr, data.mdbVal.ptr))
     }
 }

@@ -1,8 +1,8 @@
 expect class Cursor : AutoCloseable {
-    internal fun get(option: CursorOption) : Result
-    internal fun get(key:ByteArray, option: CursorOption) : Result
-    internal fun get(key:ByteArray, data: ByteArray, option: CursorOption) : Result
-    internal fun put(key:ByteArray, data: ByteArray, option: CursorPutOption) : Result
+    internal fun get(option: CursorOption) : Triple<Int, Val, Val>
+    internal fun get(key: Val, option: CursorOption) : Triple<Int, Val, Val>
+    internal fun get(key: Val, data: Val, option: CursorOption) : Triple<Int, Val, Val>
+    internal fun put(key: Val, data: Val, option: CursorPutOption) : Triple<Int, Val, Val>
     fun delete()
     fun deleteDuplicateData()
     override fun close()
@@ -30,41 +30,67 @@ fun Cursor.firstDuplicate() = get(CursorOption.FIRST_DUP)
 
 fun Cursor.getCurrent() = get(CursorOption.GET_CURRENT)
 
-fun Cursor.getBoth(key: ByteArray, data: ByteArray) = get(key, data, CursorOption.GET_BOTH)
+fun Cursor.getBoth(key: ByteArray, data: ByteArray) = get(key.toVal(), data.toVal(), CursorOption.GET_BOTH)
 
-fun Cursor.getBothRange(key: ByteArray, data: ByteArray) = get(key, data, CursorOption.GET_BOTH_RANGE)
+fun Cursor.getBoth(key: Val, data: Val) = get(key, data, CursorOption.GET_BOTH)
 
-fun Cursor.set(key: ByteArray) = get(key, CursorOption.SET)
+fun Cursor.getBothRange(key: ByteArray, data: ByteArray) = get(key.toVal(), data.toVal(), CursorOption.GET_BOTH_RANGE)
 
-fun Cursor.setKey(key: ByteArray) = get(key, CursorOption.SET_KEY)
+fun Cursor.getBothRange(key: Val, data: Val) = get(key, data, CursorOption.GET_BOTH_RANGE)
 
-fun Cursor.setRange(key: ByteArray) = get(key, CursorOption.SET_RANGE)
+fun Cursor.set(key: ByteArray) = get(key.toVal(), CursorOption.SET)
 
-fun Cursor.put(key: ByteArray, data: ByteArray) = put(key, data, CursorPutOption.NONE)
+fun Cursor.set(key: Val) = get(key, CursorOption.SET)
 
-fun Cursor.putAppend(key: ByteArray, data: ByteArray) = put(key, data, CursorPutOption.APPEND)
+fun Cursor.setKey(key: ByteArray) = get(key.toVal(), CursorOption.SET_KEY)
 
-fun Cursor.putCurrent(key: ByteArray, data: ByteArray) = put(key, data, CursorPutOption.CURRENT)
+fun Cursor.setKey(key: Val) = get(key, CursorOption.SET_KEY)
 
-fun Cursor.putReserve(key: ByteArray, data: ByteArray) = put(key, data, CursorPutOption.RESERVE)
+fun Cursor.setRange(key: ByteArray) = get(key.toVal(), CursorOption.SET_RANGE)
 
-fun Cursor.putAppendDuplicate(key: ByteArray, data: ByteArray) = put(key, data, CursorPutOption.APPENDDUP)
+fun Cursor.setRange(key: Val) = get(key, CursorOption.SET_RANGE)
 
-fun Cursor.putMultiple(key: ByteArray, data: ByteArray, size: Int) = put(key, data, CursorPutOption.MULTIPLE)
+fun Cursor.put(key: ByteArray, data: ByteArray) = put(key.toVal(), data.toVal(), CursorPutOption.NONE)
 
-fun Cursor.putNoDuplicateData(key: ByteArray, data: ByteArray) = put(key, data, CursorPutOption.NODUPDATA)
+fun Cursor.put(key: Val, data: Val) = put(key, data, CursorPutOption.NONE)
 
-fun Cursor.putNoOverwrite(key: ByteArray, data: ByteArray) = put(key, data, CursorPutOption.NOOVERWRITE)
+fun Cursor.putAppend(key: ByteArray, data: ByteArray) = put(key.toVal(), data.toVal(), CursorPutOption.APPEND)
 
-fun Cursor.asSequence() = sequence {
+fun Cursor.putAppend(key: Val, data: Val) = put(key, data, CursorPutOption.APPEND)
+
+fun Cursor.putCurrent(key: ByteArray, data: ByteArray) = put(key.toVal(), data.toVal(), CursorPutOption.CURRENT)
+
+fun Cursor.putCurrent(key: Val, data: Val) = put(key, data, CursorPutOption.CURRENT)
+
+fun Cursor.putReserve(key: ByteArray, data: ByteArray) = put(key.toVal(), data.toVal(), CursorPutOption.RESERVE)
+
+fun Cursor.putReserve(key: Val, data: Val) = put(key, data, CursorPutOption.RESERVE)
+
+fun Cursor.putAppendDuplicate(key: ByteArray, data: ByteArray) = put(key.toVal(), data.toVal(), CursorPutOption.APPENDDUP)
+
+fun Cursor.putAppendDuplicate(key: Val, data: Val) = put(key, data, CursorPutOption.APPENDDUP)
+
+fun Cursor.putMultiple(key: ByteArray, data: ByteArray, size: Int) = put(key.toVal(), data.toVal(), CursorPutOption.MULTIPLE)
+
+fun Cursor.putMultiple(key: Val, data: Val) = put(key, data, CursorPutOption.MULTIPLE)
+
+fun Cursor.putNoDuplicateData(key: ByteArray, data: ByteArray) = put(key.toVal(), data.toVal(), CursorPutOption.NODUPDATA)
+
+fun Cursor.putNoDuplicateData(key: Val, data: Val) = put(key, data, CursorPutOption.NODUPDATA)
+
+fun Cursor.putNoOverwrite(key: ByteArray, data: ByteArray) = put(key.toVal(), data.toVal(), CursorPutOption.NOOVERWRITE)
+
+fun Cursor.putNoOverwrite(key: Val, data: Val) = put(key, data, CursorPutOption.NOOVERWRITE)
+
+fun Cursor.asSequence() : Sequence<Triple<Int, Val, Val>> = sequence {
     var hasNext = true
     while (hasNext) {
         val result = next()
-        if (result.resultCode == 0) {
+        if (result.first == 0) {
             yield(result)
         } else {
             hasNext = false
-            checkRead(result.resultCode)
+            check(result.first)
         }
     }
 }
