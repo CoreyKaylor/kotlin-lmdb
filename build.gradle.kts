@@ -1,5 +1,5 @@
 plugins {
-    kotlin("multiplatform") version "2.0.20"
+    kotlin("multiplatform") version "2.0.21"
 }
 
 group = "com.github.kotlin-lmdb"
@@ -61,6 +61,7 @@ kotlin {
             languageSettings.apply {
                 optIn("kotlinx.cinterop.ExperimentalForeignApi")
                 optIn("kotlinx.io.core.ExperimentalIO")
+                optIn("kotlin.uuid.ExperimentalUuidApi")
             }
         }
     }
