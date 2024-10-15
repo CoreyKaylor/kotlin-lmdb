@@ -50,9 +50,9 @@ actual class Env : AutoCloseable {
         get() {
             val mdbEnvInfo: Library.MDB_envinfo = Library.MDB_envinfo(Library.RUNTIME)
             check(LMDB.mdb_env_info(ptr, mdbEnvInfo))
-            return EnvInfo(mdbEnvInfo.f2_me_last_pgno.get().toULong(), mdbEnvInfo.f3_me_last_txnid.get().toULong(),
-                mdbEnvInfo.f0_me_mapaddr.get().address().toULong(), mdbEnvInfo.f1_me_mapsize.get().toULong(),
-                mdbEnvInfo.f4_me_maxreaders.get().toUInt(), mdbEnvInfo.f5_me_numreaders.get().toUInt())
+            return EnvInfo(mdbEnvInfo.f2_me_last_pgno.longValue().toULong(), mdbEnvInfo.f3_me_last_txnid.longValue().toULong(),
+                mdbEnvInfo.f0_me_mapaddr.longValue().toULong(), mdbEnvInfo.f1_me_mapsize.longValue().toULong(),
+                mdbEnvInfo.f4_me_maxreaders.intValue().toUInt(), mdbEnvInfo.f5_me_numreaders.intValue().toUInt())
         }
 
     actual fun open(path: String, vararg options: EnvOption, mode: UShort) {

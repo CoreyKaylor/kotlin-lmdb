@@ -13,12 +13,8 @@ actual class Env : AutoCloseable {
     }
 
 
-    private var _isOpened = false
-    var isOpened: Boolean
-        get() = _isOpened
-        private set(value) {
-            _isOpened = value
-        }
+    var isOpened: Boolean = false
+        private set
     private var isClosed = false
 
     actual var maxDatabases: UInt = 0u
@@ -41,31 +37,30 @@ actual class Env : AutoCloseable {
 
     actual val stat: Stat?
         get() {
-        val statPtr: CValue<MDB_stat> = cValue<MDB_stat>()
-        check(mdb_env_stat(ptr, statPtr))
-        val pointed = memScoped {
-            statPtr.ptr.pointed
+            return memScoped {
+                val statPtr = alloc<MDB_stat>()
+                check(mdb_env_stat(ptr, statPtr.ptr))
+                Stat(
+                    statPtr.ms_branch_pages, statPtr.ms_depth, statPtr.ms_entries, statPtr.ms_leaf_pages,
+                    statPtr.ms_overflow_pages, statPtr.ms_psize
+                )
+            }
         }
-        return Stat(
-            pointed.ms_branch_pages, pointed.ms_depth, pointed.ms_entries, pointed.ms_leaf_pages,
-            pointed.ms_overflow_pages, pointed.ms_psize
-        )
-    }
 
     actual val info: EnvInfo?
         get() {
-            val envInfo: CValue<MDB_envinfo> = cValue<MDB_envinfo>()
-            check(mdb_env_info(ptr, envInfo))
-            val pointed = memScoped {
-                envInfo.ptr.pointed
+            return memScoped {
+            val envInfo = alloc<MDB_envinfo>()
+            check(mdb_env_info(ptr, envInfo.ptr))
+                EnvInfo(envInfo.me_last_pgno, envInfo.me_last_txnid, envInfo.me_mapaddr.toLong().toULong(),
+                    envInfo.me_mapsize, envInfo.me_maxreaders, envInfo.me_numreaders)
             }
-            return EnvInfo(pointed.me_last_pgno, pointed.me_last_txnid,
-                pointed.me_mapaddr.toLong().toULong(), pointed.me_mapsize, pointed.me_maxreaders, pointed.me_numreaders)
         }
 
     actual fun open(path: String, vararg options: EnvOption, mode: UShort) {
         isOpened = true
-        check(mdb_env_open(ptr, path, options.asIterable().toFlags(), mode))
+        val result = mdb_env_open(ptr, path, options.asIterable().toFlags(), mode)
+        check(result)
     }
 
     actual fun beginTxn(vararg options: TxnOption) : Txn {

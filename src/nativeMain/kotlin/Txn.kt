@@ -81,6 +81,7 @@ actual class Txn internal actual constructor(private val env: Env, parent: Txn?,
         if (state == Ready) {
             mdb_txn_abort(ptr)
         }
+        arena.clear()
         state = Released
     }
 
