@@ -63,7 +63,7 @@ actual class Txn internal actual constructor(env: Env, parent: Txn?, vararg opti
     actual fun get(dbi: Dbi, key: Val) : Triple<Int, Val, Val> {
         val data = MDBVal.output()
         val resultCode = LMDB.mdb_get(ptr, dbi.ptr, key.mdbVal.ptr, data.ptr)
-        return buildResult(resultCode, key, Val.fromMDBVal(data))
+        return buildReadResult(resultCode, key, Val.fromMDBVal(data))
     }
 
     actual fun put(dbi: Dbi, key: Val, data: Val, vararg options: PutOption) {
