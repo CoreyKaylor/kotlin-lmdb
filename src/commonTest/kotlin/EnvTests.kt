@@ -54,4 +54,17 @@ class EnvTests {
             it.open(path, EnvOption.ReadOnly)
         }
     }
+
+    @Test
+    fun `can copy an environment and open afterwards`() {
+        val path = pathCreateTestDir()
+        val copyPath = pathCreateTestDir()
+        Env().use {
+            it.open(path)
+            it.copyTo(copyPath, true)
+        }
+        Env().use {
+            it.open(copyPath)
+        }
+    }
 }
