@@ -12,7 +12,7 @@ expect class Env() : AutoCloseable {
      * [mode] (0664 default) The UNIX permissions to set on created files and semaphores.
      * This parameter is ignored on Windows.
      */
-    fun open(path: String, vararg options: EnvOption, mode: UShort = 664u)
+    fun open(path: String, vararg options: EnvOption, mode: String = "0664")
 
     fun beginTxn(vararg options: TxnOption) : Txn
 

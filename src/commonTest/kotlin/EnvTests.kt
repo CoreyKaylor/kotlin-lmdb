@@ -43,4 +43,15 @@ class EnvTests {
         val env = createRandomTestEnv()
         assertNotNull(env.stat)
     }
+
+    @Test
+    fun `can open a readonly environment`() {
+        val path = pathCreateTestDir()
+        Env().use {
+            it.open(path) //must be initially created first before readonly can be opened
+        }
+        Env().use {
+            it.open(path, EnvOption.ReadOnly)
+        }
+    }
 }

@@ -55,9 +55,9 @@ actual class Env : AutoCloseable {
                 mdbEnvInfo.f4_me_maxreaders.intValue().toUInt(), mdbEnvInfo.f5_me_numreaders.intValue().toUInt())
         }
 
-    actual fun open(path: String, vararg options: EnvOption, mode: UShort) {
+    actual fun open(path: String, vararg options: EnvOption, mode: String) {
         isOpened = true
-        check(LMDB.mdb_env_open(ptr, path, options.asIterable().toFlags().toInt(), mode.toInt()))
+        check(LMDB.mdb_env_open(ptr, path, options.asIterable().toFlags().toInt(), mode.toInt(8)))
     }
 
     actual fun beginTxn(vararg options: TxnOption) : Txn {

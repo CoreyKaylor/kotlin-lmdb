@@ -57,9 +57,9 @@ actual class Env : AutoCloseable {
             }
         }
 
-    actual fun open(path: String, vararg options: EnvOption, mode: UShort) {
+    actual fun open(path: String, vararg options: EnvOption, mode: String) {
         isOpened = true
-        val result = mdb_env_open(ptr, path, options.asIterable().toFlags(), mode)
+        val result = mdb_env_open(ptr, path, options.asIterable().toFlags(), mode.toUShort(8))
         check(result)
     }
 
