@@ -16,6 +16,8 @@ expect class Txn : AutoCloseable {
 
     fun dbiOpen(name: String? = null, vararg options: DbiOption) : Dbi
 
+    fun dbiOpen(name: String?, comparer: ValComparer, vararg options: DbiOption) : Dbi
+    
     fun drop(dbi: Dbi)
 
     fun empty(dbi: Dbi)
@@ -54,3 +56,5 @@ enum class TxnState {
     Reset,
     Released
 }
+
+typealias ValCompare = (Val, Val) -> Int

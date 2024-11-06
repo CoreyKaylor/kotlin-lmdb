@@ -2,13 +2,19 @@ import kotlinx.cinterop.*
 import kotlin.native.ref.createCleaner
 import lmdb.MDB_val
 import kotlin.experimental.ExperimentalNativeApi
+import kotlin.native.ref.Cleaner
 
-actual class Val(val mdbVal: MDB_val, private val arena: Arena) {
-    @OptIn(ExperimentalNativeApi::class)
-    private val cleaner = createCleaner(this, Val::clean)
+@OptIn(ExperimentalNativeApi::class)
+actual class Val(val mdbVal: MDB_val, private val arena: Arena?) {
+    private var cleaner: Cleaner? = null
+    init {
+        if (arena != null) {
+            cleaner = createCleaner(this, Val::clean)
+        }
+    }
 
     fun clean() {
-        arena.clear()
+        arena?.clear()
     }
 
     actual fun toByteArray() : ByteArray? {
@@ -25,13 +31,21 @@ actual class Val(val mdbVal: MDB_val, private val arena: Arena) {
 
         fun input(byteArray: ByteArray): Val = memScoped {
             val arena = Arena()
-            return byteArray.usePinned {
+            return byteArray.usePinned { pinned ->
                 val mdbVal = arena.alloc<MDB_val> {
-                    mv_data = it.addressOf(0)
+                    mv_data = pinned.startAddressOf
                     mv_size = byteArray.size.convert()
                 }
                 Val(mdbVal, arena)
             }
+        }
+
+        fun forCompare(mdbVal: MDB_val): Val = memScoped {
+            Val(mdbVal, null)
+        }
+        
+        fun forCompare(mdbValPtr: CPointer<MDB_val>?): Val {
+            return forCompare(checkNotNull(mdbValPtr).pointed)
         }
     }
 }
@@ -39,3 +53,6 @@ actual class Val(val mdbVal: MDB_val, private val arena: Arena) {
 actual fun ByteArray.toVal() : Val {
     return Val.input(this)
 }
+
+private val emptyPinnedByte = ByteArray(1).pin()
+val Pinned<ByteArray>.startAddressOf: CPointer<ByteVar> get() = if (this.get().isNotEmpty()) this.addressOf(0) else emptyPinnedByte.addressOf(0)

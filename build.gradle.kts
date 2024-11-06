@@ -1,5 +1,5 @@
 plugins {
-    kotlin("multiplatform") version "2.0.21"
+    kotlin("multiplatform") version "2.1.10"
 }
 
 group = "com.github.kotlin-lmdb"
@@ -14,7 +14,7 @@ kotlin {
     compilerOptions {
         freeCompilerArgs.add("-Xexpect-actual-classes")
     }
-    jvmToolchain(11)
+    jvmToolchain(21)
     jvm {
         withJava()
         testRuns["test"].executionTask.configure {
@@ -32,7 +32,7 @@ kotlin {
         compilations.getByName("main") {
             cinterops {
                 val liblmdb by creating {
-                    includeDirs.allHeaders("${project.rootDir}/src/nativeInterop/lmdb/libraries/liblmdb/")
+                    includeDirs("src/nativeInterop/cinterop/c/")
                 }
             }
         }
@@ -62,6 +62,7 @@ kotlin {
                 optIn("kotlinx.cinterop.ExperimentalForeignApi")
                 optIn("kotlinx.io.core.ExperimentalIO")
                 optIn("kotlin.uuid.ExperimentalUuidApi")
+                optIn("kotlin.experimental.ExperimentalNativeApi")
             }
         }
     }

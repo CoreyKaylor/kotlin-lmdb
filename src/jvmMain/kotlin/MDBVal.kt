@@ -16,6 +16,13 @@ class MDBVal private constructor(val ptr: Pointer) {
             val ptr = MEMORY.allocateTemporary(16, false)
             return MDBVal(ptr)
         }
+        
+        /**
+         * Create an MDBVal from a JNR pointer
+         */
+        internal fun fromJNRPointer(pointer: Pointer): MDBVal {
+            return MDBVal(pointer)
+        }
     }
 }
 

@@ -1,11 +1,10 @@
 import kotlinx.cinterop.*
 import lmdb.*
 
-actual class Dbi actual constructor(name: String?, tx: Txn, vararg options: DbiOption) {
+actual class Dbi actual constructor(name: String?, private val tx: Txn, vararg options: DbiOption) {
     private val arena = Arena()
     private val dbiPtr = arena.alloc<MDB_dbiVar>()
     internal val dbi: MDB_dbi
-
 
     init {
         check(mdb_dbi_open(tx.ptr, name, options.asIterable().toFlags(), dbiPtr.ptr))

@@ -1,5 +1,4 @@
-headers = lmdb.h mdb.c
+headers = lmdb.h midl.h mdb.c midl.c
 package = lmdb
-
-staticLibraries = liblmdb.a
-libraryPaths = /usr/local/lib
+headerFilter = lmdb.h midl.h
+compilerOpts = -pthread -O2 -g -Wall -Wno-unused-parameter -Wbad-function-cast -Wuninitialized

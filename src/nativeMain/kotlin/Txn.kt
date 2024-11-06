@@ -56,6 +56,13 @@ actual class Txn internal actual constructor(private val env: Env, parent: Txn?,
     actual fun dbiOpen(name: String?, vararg options: DbiOption) : Dbi {
         return Dbi(name, this, *options)
     }
+    
+    actual fun dbiOpen(name: String?, comparer: ValComparer, vararg options: DbiOption) : Dbi {
+        val db = Dbi(name, this, *options)
+        val compareFn = ValComparerImpl.getComparerCallback(comparer)
+        check(mdb_set_compare(ptr, db.dbi, compareFn))
+        return db
+    }
 
     actual fun get(dbi: Dbi, key: Val) : Triple<Int, Val, Val> {
         val mdbData = Val.output()
