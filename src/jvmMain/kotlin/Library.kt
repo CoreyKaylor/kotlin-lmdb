@@ -109,7 +109,7 @@ internal class Library {
         fun mdb_env_get_fd(@In env: Pointer?, @In fd: Pointer?): Int
         fun mdb_env_get_flags(@In env: Pointer?, @Out flags: IntByReference?): Int
         fun mdb_env_get_maxkeysize(@In env: Pointer?): Int
-        fun mdb_env_get_maxreaders(@In env: Pointer?, readers: Int): Int
+        fun mdb_env_get_maxreaders(@In env: Pointer?, @Out readers: IntByReference?): Int
         fun mdb_env_get_path(@In env: Pointer?, path: String?): Int
         fun mdb_env_get_userctx(@In env: Pointer?): Pointer?
         fun mdb_env_info(@In env: Pointer?, @Out info: MDB_envinfo?): Int

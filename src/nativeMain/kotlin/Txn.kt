@@ -8,6 +8,12 @@ actual class Txn internal actual constructor(private val env: Env, parent: Txn?,
     internal val ptr: CPointer<MDB_txn>
     internal actual var state: TxnState
     private var isClosed = false
+    
+    actual val id: ULong
+        get() {
+            checkReady()
+            return mdb_txn_id(ptr)
+        }
 
     internal actual constructor(env: Env, vararg options: TxnOption) : this(env, null, *options)
 

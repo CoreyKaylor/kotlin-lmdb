@@ -11,6 +11,12 @@ actual class Txn internal actual constructor(env: Env, parent: Txn?, vararg opti
     internal val ptr: Pointer
     private val parentTx: Pointer?
     internal actual var state: TxnState
+    
+    actual val id: ULong
+        get() {
+            checkReady()
+            return LMDB.mdb_txn_id(ptr).toULong()
+        }
 
     internal actual constructor(env: Env, vararg options: TxnOption) : this(env, null, *options)
 

@@ -3,6 +3,16 @@ expect class Txn : AutoCloseable {
     internal var state: TxnState
     internal constructor(env: Env, vararg options: TxnOption)
     internal constructor(env: Env, parent: Txn?, vararg options: TxnOption)
+    
+    /**
+     * The transaction ID.
+     * 
+     * For a read-only transaction, this corresponds to the snapshot being read;
+     * concurrent readers will frequently have the same transaction ID.
+     * 
+     * @return A transaction ID, valid if this transaction is active.
+     */
+    val id: ULong
 
     fun begin(vararg options: TxnOption) : Txn
 

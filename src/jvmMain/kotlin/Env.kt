@@ -33,9 +33,26 @@ actual class Env : AutoCloseable {
         }
 
     actual var maxReaders: UInt = 0u
+        get() {
+            val readersRef = IntByReference()
+            check(LMDB.mdb_env_get_maxreaders(ptr, readersRef))
+            return readersRef.value.toUInt()
+        }
         set(value) {
             LMDB.mdb_env_set_maxreaders(ptr, value.toInt())
             field = value
+        }
+        
+    actual val maxKeySize: UInt
+        get() {
+            return LMDB.mdb_env_get_maxkeysize(ptr).toUInt()
+        }
+        
+    actual val staleReaderCount: UInt
+        get() {
+            val deadRef = IntByReference()
+            check(LMDB.mdb_reader_check(ptr, deadRef))
+            return deadRef.value.toUInt()
         }
 
     actual var flags: Set<EnvOption> = emptySet()
@@ -98,6 +115,10 @@ actual class Env : AutoCloseable {
             0
         }
         check(LMDB.mdb_env_copy2(ptr, path, flags))
+    }
+    
+    actual fun copyTo(path: String) {
+        check(LMDB.mdb_env_copy(ptr, path))
     }
 
     actual fun sync(force: Boolean) {

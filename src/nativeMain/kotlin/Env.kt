@@ -30,9 +30,30 @@ actual class Env : AutoCloseable {
         }
 
     actual var maxReaders: UInt = 0u
+        get() {
+            return memScoped {
+                val readersVar = alloc<UIntVar>()
+                check(mdb_env_get_maxreaders(ptr, readersVar.ptr))
+                readersVar.value
+            }
+        }
         set(value) {
             check(mdb_env_set_maxreaders(ptr, value))
             field = value
+        }
+        
+    actual val maxKeySize: UInt
+        get() {
+            return mdb_env_get_maxkeysize(ptr).toUInt()
+        }
+        
+    actual val staleReaderCount: UInt
+        get() {
+            return memScoped {
+                val deadVar = alloc<IntVar>()
+                check(mdb_reader_check(ptr, deadVar.ptr))
+                deadVar.value.toUInt()
+            }
         }
 
     actual var flags: Set<EnvOption> = emptySet()
@@ -102,6 +123,10 @@ actual class Env : AutoCloseable {
             0u
         }
         check(mdb_env_copy2(ptr, path, flags))
+    }
+    
+    actual fun copyTo(path: String) {
+        check(mdb_env_copy(ptr, path))
     }
 
     actual fun sync(force: Boolean) {
