@@ -84,38 +84,52 @@ internal class Library {
     }
 
     interface Lmdb {
+        fun mdb_cmp(@In txn: Pointer?, @In dbi: Pointer?, @In a: Pointer?, @In b: Pointer?): Int
         fun mdb_cursor_close(@In cursor: Pointer?)
         fun mdb_cursor_count(@In cursor: Pointer?, countp: NativeLongByReference?): Int
+        fun mdb_cursor_dbi(@In cursor: Pointer?): Pointer?
         fun mdb_cursor_del(@In cursor: Pointer?, flags: Int): Int
         fun mdb_cursor_get(@In cursor: Pointer?, k: Pointer?, @Out v: Pointer?, cursorOp: Int): Int
         fun mdb_cursor_open(@In txn: Pointer?, @In dbi: Pointer?, cursorPtr: PointerByReference?): Int
         fun mdb_cursor_put(@In cursor: Pointer?, @In key: Pointer?, @In data: Pointer?, flags: Int): Int
         fun mdb_cursor_renew(@In txn: Pointer?, @In cursor: Pointer?): Int
+        fun mdb_cursor_txn(@In cursor: Pointer?): Pointer?
         fun mdb_dbi_close(@In env: Pointer?, @In dbi: Pointer?)
         fun mdb_dbi_flags(@In txn: Pointer?, @In dbi: Pointer?, @Out flags: IntByReference?): Int
         fun mdb_dbi_open(@In txn: Pointer?, @In name: ByteArray?, flags: Int, @In dbiPtr: Pointer?): Int
+        fun mdb_dcmp(@In txn: Pointer?, @In dbi: Pointer?, @In a: Pointer?, @In b: Pointer?): Int
         fun mdb_del(@In txn: Pointer?, @In dbi: Pointer?, @In key: Pointer?, @In data: Pointer?): Int
         fun mdb_drop(@In txn: Pointer?, @In dbi: Pointer?, del: Int): Int
         fun mdb_env_close(@In env: Pointer?)
+        fun mdb_env_copy(@In env: Pointer?, @In path: String?): Int
         fun mdb_env_copy2(@In env: Pointer?, @In path: String?, flags: Int): Int
+        fun mdb_env_copyfd(@In env: Pointer?, @In fd: Pointer?): Int
+        fun mdb_env_copyfd2(@In env: Pointer?, @In fd: Pointer?, flags: Int): Int
         fun mdb_env_create(envPtr: PointerByReference?): Int
         fun mdb_env_get_fd(@In env: Pointer?, @In fd: Pointer?): Int
         fun mdb_env_get_flags(@In env: Pointer?, flags: Int): Int
         fun mdb_env_get_maxkeysize(@In env: Pointer?): Int
         fun mdb_env_get_maxreaders(@In env: Pointer?, readers: Int): Int
         fun mdb_env_get_path(@In env: Pointer?, path: String?): Int
+        fun mdb_env_get_userctx(@In env: Pointer?): Pointer?
         fun mdb_env_info(@In env: Pointer?, @Out info: MDB_envinfo?): Int
         fun mdb_env_open(@In env: Pointer?, @In path: String?, flags: Int, mode: Int): Int
+        fun mdb_env_set_assert(@In env: Pointer?, @In func: Pointer?): Int
         fun mdb_env_set_flags(@In env: Pointer?, flags: Int, onoff: Int): Int
         fun mdb_env_set_mapsize(@In env: Pointer?, @size_t size: Long): Int
         fun mdb_env_set_maxdbs(@In env: Pointer?, dbs: Int): Int
         fun mdb_env_set_maxreaders(@In env: Pointer?, readers: Int): Int
+        fun mdb_env_set_userctx(@In env: Pointer?, @In ctx: Pointer?): Int
         fun mdb_env_stat(@In env: Pointer?, @Out stat: MDB_stat?): Int
         fun mdb_env_sync(@In env: Pointer?, f: Int): Int
         fun mdb_get(@In txn: Pointer?, @In dbi: Pointer?, @In key: Pointer?, @Out data: Pointer?): Int
         fun mdb_put(@In txn: Pointer?, @In dbi: Pointer?, @In key: Pointer?, @In data: Pointer?, flags: Int): Int
         fun mdb_reader_check(@In env: Pointer?, @Out dead: IntByReference?): Int
+        fun mdb_reader_list(@In env: Pointer?, @In func: Pointer?, @In ctx: Pointer?): Int
         fun mdb_set_compare(@In txn: Pointer?, @In dbi: Pointer?, cb: ComparatorCallback?): Int
+        fun mdb_set_dupsort(@In txn: Pointer?, @In dbi: Pointer?, @In cmp: Pointer?): Int
+        fun mdb_set_relctx(@In txn: Pointer?, @In dbi: Pointer?, @In ctx: Pointer?): Int
+        fun mdb_set_relfunc(@In txn: Pointer?, @In dbi: Pointer?, @In rel: Pointer?): Int
         fun mdb_stat(@In txn: Pointer?, @In dbi: Pointer?, @Out stat: MDB_stat?): Int
         fun mdb_strerror(rc: Int): String?
         fun mdb_txn_abort(@In txn: Pointer?)
