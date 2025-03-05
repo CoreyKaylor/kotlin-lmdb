@@ -5,6 +5,7 @@ expect class Env() : AutoCloseable {
     var maxReaders: UInt
     val stat: Stat?
     val info: EnvInfo?
+    var flags: Set<EnvOption>
 
     /**
      * Opens this environment at the provided [path] given the environment open [options]

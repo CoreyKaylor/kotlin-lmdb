@@ -1,6 +1,7 @@
 import jnr.ffi.byref.PointerByReference
 import Library.Companion.LMDB
 import jnr.ffi.Pointer
+import jnr.ffi.byref.IntByReference
 
 actual class Env : AutoCloseable {
     private val envPtr = PointerByReference()
@@ -34,6 +35,32 @@ actual class Env : AutoCloseable {
     actual var maxReaders: UInt = 0u
         set(value) {
             LMDB.mdb_env_set_maxreaders(ptr, value.toInt())
+            field = value
+        }
+
+    actual var flags: Set<EnvOption> = emptySet()
+        get() {
+            val flagsRef = IntByReference()
+            check(LMDB.mdb_env_get_flags(ptr, flagsRef))
+            val flagsValue = flagsRef.value.toUInt()
+            return EnvOption.values().filter { flagsValue and it.option == it.option }.toSet()
+        }
+        set(value) {
+            // Get current flags first
+            val currentFlags = this.flags
+            
+            // Clear flags that are in current but not in new value
+            val flagsToClear = currentFlags.minus(value)
+            flagsToClear.forEach { flag ->
+                check(LMDB.mdb_env_set_flags(ptr, flag.option.toInt(), 0))
+            }
+            
+            // Set flags that are in new value but not in current
+            val flagsToSet = value.minus(currentFlags)
+            flagsToSet.forEach { flag ->
+                check(LMDB.mdb_env_set_flags(ptr, flag.option.toInt(), 1))
+            }
+            
             field = value
         }
 

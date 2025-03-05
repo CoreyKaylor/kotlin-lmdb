@@ -35,6 +35,34 @@ actual class Env : AutoCloseable {
             field = value
         }
 
+    actual var flags: Set<EnvOption> = emptySet()
+        get() {
+            val flagsValue = memScoped {
+                val flagsVar = alloc<UIntVar>()
+                check(mdb_env_get_flags(ptr, flagsVar.ptr))
+                flagsVar.value
+            }
+            return EnvOption.values().filter { flagsValue and it.option == it.option }.toSet()
+        }
+        set(value) {
+            // Get current flags first
+            val currentFlags = this.flags
+            
+            // Clear flags that are in current but not in new value
+            val flagsToClear = currentFlags.minus(value)
+            flagsToClear.forEach { flag ->
+                check(mdb_env_set_flags(ptr, flag.option, 0))
+            }
+            
+            // Set flags that are in new value but not in current
+            val flagsToSet = value.minus(currentFlags)
+            flagsToSet.forEach { flag ->
+                check(mdb_env_set_flags(ptr, flag.option, 1))
+            }
+            
+            field = value
+        }
+
     actual val stat: Stat?
         get() {
             return memScoped {
