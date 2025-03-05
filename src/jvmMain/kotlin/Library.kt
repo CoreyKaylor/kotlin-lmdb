@@ -127,7 +127,7 @@ internal class Library {
         fun mdb_reader_check(@In env: Pointer?, @Out dead: IntByReference?): Int
         fun mdb_reader_list(@In env: Pointer?, @In func: Pointer?, @In ctx: Pointer?): Int
         fun mdb_set_compare(@In txn: Pointer?, @In dbi: Pointer?, cb: ComparatorCallback?): Int
-        fun mdb_set_dupsort(@In txn: Pointer?, @In dbi: Pointer?, @In cmp: Pointer?): Int
+        fun mdb_set_dupsort(@In txn: Pointer?, @In dbi: Pointer?, cb: ComparatorCallback?): Int
         fun mdb_set_relctx(@In txn: Pointer?, @In dbi: Pointer?, @In ctx: Pointer?): Int
         fun mdb_set_relfunc(@In txn: Pointer?, @In dbi: Pointer?, @In rel: Pointer?): Int
         fun mdb_stat(@In txn: Pointer?, @In dbi: Pointer?, @Out stat: MDB_stat?): Int

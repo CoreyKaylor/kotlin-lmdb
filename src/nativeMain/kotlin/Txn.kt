@@ -63,10 +63,21 @@ actual class Txn internal actual constructor(private val env: Env, parent: Txn?,
         return Dbi(name, this, *options)
     }
     
-    actual fun dbiOpen(name: String?, comparer: ValComparer, vararg options: DbiOption) : Dbi {
+    actual fun dbiOpen(name: String?, config: DbiConfig, vararg options: DbiOption) : Dbi {
         val db = Dbi(name, this, *options)
-        val compareFn = ValComparerImpl.getComparerCallback(comparer)
-        check(mdb_set_compare(ptr, db.dbi, compareFn))
+        
+        // Set key comparer if provided
+        config.keyComparer?.let { comparer ->
+            val keyCompareFn = ValComparerImpl.getComparerCallback(comparer)
+            check(mdb_set_compare(ptr, db.dbi, keyCompareFn))
+        }
+        
+        // Set duplicate data comparer if provided
+        config.dupComparer?.let { comparer ->
+            val dupCompareFn = ValComparerImpl.getComparerCallback(comparer)
+            check(mdb_set_dupsort(ptr, db.dbi, dupCompareFn))
+        }
+        
         return db
     }
 

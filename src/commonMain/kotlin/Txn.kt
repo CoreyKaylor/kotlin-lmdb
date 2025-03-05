@@ -26,7 +26,15 @@ expect class Txn : AutoCloseable {
 
     fun dbiOpen(name: String? = null, vararg options: DbiOption) : Dbi
 
-    fun dbiOpen(name: String?, comparer: ValComparer, vararg options: DbiOption) : Dbi
+    /**
+     * Opens a database in the environment with custom comparers
+     * 
+     * @param name The name of the database to open, or null for the default database
+     * @param config Configuration object that can contain key and duplicate value comparers
+     * @param options Special options for this database
+     * @return A database handle (Dbi)
+     */
+    fun dbiOpen(name: String?, config: DbiConfig, vararg options: DbiOption) : Dbi
     
     fun drop(dbi: Dbi)
 
