@@ -103,23 +103,23 @@ internal class Library {
         fun mdb_env_close(@In env: Pointer?)
         fun mdb_env_copy(@In env: Pointer?, @In path: String?): Int
         fun mdb_env_copy2(@In env: Pointer?, @In path: String?, flags: Int): Int
-        fun mdb_env_copyfd(@In env: Pointer?, @In fd: Pointer?): Int
-        fun mdb_env_copyfd2(@In env: Pointer?, @In fd: Pointer?, flags: Int): Int
+        fun _mdb_env_copyfd(@In env: Pointer?, @In fd: Pointer?): Int
+        fun _mdb_env_copyfd2(@In env: Pointer?, @In fd: Pointer?, flags: Int): Int
         fun mdb_env_create(envPtr: PointerByReference?): Int
-        fun mdb_env_get_fd(@In env: Pointer?, @In fd: Pointer?): Int
+        fun _mdb_env_get_fd(@In env: Pointer?, @In fd: Pointer?): Int
         fun mdb_env_get_flags(@In env: Pointer?, @Out flags: IntByReference?): Int
         fun mdb_env_get_maxkeysize(@In env: Pointer?): Int
         fun mdb_env_get_maxreaders(@In env: Pointer?, @Out readers: IntByReference?): Int
-        fun mdb_env_get_path(@In env: Pointer?, path: String?): Int
-        fun mdb_env_get_userctx(@In env: Pointer?): Pointer?
+        fun _mdb_env_get_path(@In env: Pointer?, path: String?): Int
+        fun _mdb_env_get_userctx(@In env: Pointer?): Pointer?
         fun mdb_env_info(@In env: Pointer?, @Out info: MDB_envinfo?): Int
         fun mdb_env_open(@In env: Pointer?, @In path: String?, flags: Int, mode: Int): Int
-        fun mdb_env_set_assert(@In env: Pointer?, @In func: Pointer?): Int
+        fun _mdb_env_set_assert(@In env: Pointer?, @In func: Pointer?): Int
         fun mdb_env_set_flags(@In env: Pointer?, flags: Int, onoff: Int): Int
         fun mdb_env_set_mapsize(@In env: Pointer?, @size_t size: Long): Int
         fun mdb_env_set_maxdbs(@In env: Pointer?, dbs: Int): Int
         fun mdb_env_set_maxreaders(@In env: Pointer?, readers: Int): Int
-        fun mdb_env_set_userctx(@In env: Pointer?, @In ctx: Pointer?): Int
+        fun _mdb_env_set_userctx(@In env: Pointer?, @In ctx: Pointer?): Int
         fun mdb_env_stat(@In env: Pointer?, @Out stat: MDB_stat?): Int
         fun mdb_env_sync(@In env: Pointer?, f: Int): Int
         fun mdb_get(@In txn: Pointer?, @In dbi: Pointer?, @In key: Pointer?, @Out data: Pointer?): Int
@@ -128,14 +128,14 @@ internal class Library {
         fun mdb_reader_list(@In env: Pointer?, @In func: Pointer?, @In ctx: Pointer?): Int
         fun mdb_set_compare(@In txn: Pointer?, @In dbi: Pointer?, cb: ComparatorCallback?): Int
         fun mdb_set_dupsort(@In txn: Pointer?, @In dbi: Pointer?, cb: ComparatorCallback?): Int
-        fun mdb_set_relctx(@In txn: Pointer?, @In dbi: Pointer?, @In ctx: Pointer?): Int
-        fun mdb_set_relfunc(@In txn: Pointer?, @In dbi: Pointer?, @In rel: Pointer?): Int
+        fun _mdb_set_relctx(@In txn: Pointer?, @In dbi: Pointer?, @In ctx: Pointer?): Int
+        fun _mdb_set_relfunc(@In txn: Pointer?, @In dbi: Pointer?, @In rel: Pointer?): Int
         fun mdb_stat(@In txn: Pointer?, @In dbi: Pointer?, @Out stat: MDB_stat?): Int
         fun mdb_strerror(rc: Int): String?
         fun mdb_txn_abort(@In txn: Pointer?)
         fun mdb_txn_begin(@In env: Pointer?, @In parentTx: Pointer?, flags: Int, txPtr: Pointer?): Int
         fun mdb_txn_commit(@In txn: Pointer?): Int
-        fun mdb_txn_env(@In txn: Pointer?): Pointer?
+        fun _mdb_txn_env(@In txn: Pointer?): Pointer?
         fun mdb_txn_id(@In txn: Pointer?): Long
         fun mdb_txn_renew(@In txn: Pointer?): Int
         fun mdb_txn_reset(@In txn: Pointer?)
