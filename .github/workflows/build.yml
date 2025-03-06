@@ -109,15 +109,6 @@ jobs:
         if: runner.os != 'Windows'
         run: chmod +x ./gradlew
 
-      # Run Native tests first
-      - name: Build and test Native (Linux & macOS)
-        if: runner.os != 'Windows'
-        run: ./gradlew nativeTest --info
-
-      - name: Build and test Native (Windows)
-        if: runner.os == 'Windows'
-        run: .\gradlew.bat nativeTest --info
-
       # Run JVM tests with properly installed LMDB libraries
       - name: Build and test JVM (Linux & macOS)
         if: runner.os != 'Windows'
@@ -128,6 +119,15 @@ jobs:
         if: runner.os == 'Windows'
         run: .\gradlew.bat jvmTest --info
         continue-on-error: true  # Continue even if tests fail
+
+      # Run Native tests first
+      - name: Build and test Native (Linux & macOS)
+        if: runner.os != 'Windows'
+        run: ./gradlew nativeTest --info
+
+      - name: Build and test Native (Windows)
+        if: runner.os == 'Windows'
+        run: .\gradlew.bat nativeTest --info
 
       # Complete the build process
       - name: Complete build process (Linux & macOS)
