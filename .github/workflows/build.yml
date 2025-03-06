@@ -64,6 +64,10 @@ jobs:
           # Create dylib file for macOS
           gcc -dynamiclib -o liblmdb.dylib mdb.o midl.o -install_name /usr/local/lib/liblmdb.dylib
           
+          # Create directories if they don't exist
+          sudo mkdir -p /usr/local/lib
+          sudo mkdir -p /usr/local/include
+          
           # Install the library
           sudo cp liblmdb.dylib /usr/local/lib/
           sudo cp lmdb.h midl.h /usr/local/include/
