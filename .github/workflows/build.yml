@@ -80,25 +80,33 @@ jobs:
         if: runner.os == 'Windows'
         shell: bash
         run: |
-          # Install mingw via chocolatey
-          choco install mingw --version=12.2.0.0 -y
+          # Install MSYS2 with pacman and mingw-w64
+          choco install msys2 -y
           
-          # Add mingw to PATH
-          echo "C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin" >> $GITHUB_PATH
+          # Install MinGW-w64 GCC through MSYS2
+          /c/msys64/usr/bin/pacman.exe -Sy --noconfirm mingw-w64-x86_64-gcc
+          
+          # Add MSYS2 binaries to PATH
+          export PATH="/c/msys64/mingw64/bin:$PATH"
           
           # Clone LMDB
           git clone https://git.openldap.org/openldap/openldap.git -b LMDB_0.9.33 --depth 1 /c/openldap
           cd /c/openldap/libraries/liblmdb
           
-          # Build with MinGW
-          # Create the DLL from the source files using MinGW GCC
-          x86_64-w64-mingw32-gcc -shared -o liblmdb.dll mdb.c midl.c -Wl,--out-implib,liblmdb.lib
+          # Check GCC availability
+          echo "GCC location:"
+          which gcc
           
-          # Copy to system directory
-          copy /Y "liblmdb.dll" "C:\Windows\System32\liblmdb.dll"
+          # Build with GCC from MSYS2
+          /c/msys64/mingw64/bin/gcc.exe -shared -o liblmdb.dll mdb.c midl.c -Wl,--out-implib,liblmdb.lib
           
-          # Set environment variable for JVM tests
-          echo "JAVA_TOOL_OPTIONS=-Dlmdb.native.lib=liblmdb.dll" >> $GITHUB_ENV
+          # Create temp directory for DLL
+          mkdir -p /c/liblmdb
+          cp liblmdb.dll /c/liblmdb/
+          
+          # Set environment variables for JVM tests
+          echo "JAVA_TOOL_OPTIONS=-Dlmdb.native.lib=/c/liblmdb/liblmdb.dll" >> $GITHUB_ENV
+          echo "PATH=/c/liblmdb:$PATH" >> $GITHUB_ENV
 
       - name: Cache Kotlin Native compiler
         uses: actions/cache@v4
