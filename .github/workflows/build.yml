@@ -78,29 +78,27 @@ jobs:
       # Build and install LMDB library for Windows
       - name: Build and install LMDB (Windows)
         if: runner.os == 'Windows'
-        shell: cmd
+        shell: bash
         run: |
+          # Install mingw via chocolatey
           choco install mingw --version=12.2.0.0 -y
           
-          :: Clone and build LMDB
-          git clone https://git.openldap.org/openldap/openldap.git -b LMDB_0.9.33 --depth 1 C:\openldap
+          # Add mingw to PATH
+          echo "C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin" >> $GITHUB_PATH
+          
+          # Clone LMDB
+          git clone https://git.openldap.org/openldap/openldap.git -b LMDB_0.9.33 --depth 1 /c/openldap
           cd C:\openldap\libraries\liblmdb
           
-          :: Setup Visual Studio environment
-          if exist "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat" (
-            call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
-          ) else if exist "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat" (
-            call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
-          )
-          
-          :: Build DLL
-          nmake -f Makefile.W32
+          # Build with MinGW
+          # Create the DLL from the source files using MinGW GCC
+          x86_64-w64-mingw32-gcc -shared -o liblmdb.dll mdb.c midl.c -Wl,--out-implib,liblmdb.lib
           
           :: Copy to system directory
-          copy /Y "lmdb.dll" "C:\Windows\System32\liblmdb.dll"
+          copy /Y "liblmdb.dll" "C:\Windows\System32\liblmdb.dll"
           
-          :: Set environment variable for JVM tests
-          echo JAVA_TOOL_OPTIONS=-Dlmdb.native.lib=liblmdb.dll >> %GITHUB_ENV%
+          # Set environment variable for JVM tests
+          echo "JAVA_TOOL_OPTIONS=-Dlmdb.native.lib=liblmdb.dll" >> $GITHUB_ENV
 
       - name: Cache Kotlin Native compiler
         uses: actions/cache@v4
