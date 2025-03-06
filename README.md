@@ -1,6 +1,8 @@
 kotlin-lmdb
 =============
 
+[![Build and Test](https://github.com/user/kotlin-lmdb/actions/workflows/build.yml/badge.svg)](https://github.com/user/kotlin-lmdb/actions/workflows/build.yml)
+
 Kotlin multi-platform library for OpenLDAP's LMDB key-value store.
 
 This is not a wrapper around other libraries. Kotlin-Native uses cinterop
