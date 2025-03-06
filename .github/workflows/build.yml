@@ -88,7 +88,7 @@ jobs:
           
           # Clone LMDB
           git clone https://git.openldap.org/openldap/openldap.git -b LMDB_0.9.33 --depth 1 /c/openldap
-          cd C:\openldap\libraries\liblmdb
+          cd /c/openldap/libraries/liblmdb
           
           # Build with MinGW
           # Create the DLL from the source files using MinGW GCC
