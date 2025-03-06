@@ -87,13 +87,13 @@ internal class Library {
         fun mdb_cmp(@In txn: Pointer?, @In dbi: Pointer?, @In a: Pointer?, @In b: Pointer?): Int
         fun mdb_cursor_close(@In cursor: Pointer?)
         fun mdb_cursor_count(@In cursor: Pointer?, countp: NativeLongByReference?): Int
-        fun mdb_cursor_dbi(@In cursor: Pointer?): Pointer?
+        fun _mdb_cursor_dbi(@In cursor: Pointer?): Pointer?
         fun mdb_cursor_del(@In cursor: Pointer?, flags: Int): Int
         fun mdb_cursor_get(@In cursor: Pointer?, k: Pointer?, @Out v: Pointer?, cursorOp: Int): Int
         fun mdb_cursor_open(@In txn: Pointer?, @In dbi: Pointer?, cursorPtr: PointerByReference?): Int
         fun mdb_cursor_put(@In cursor: Pointer?, @In key: Pointer?, @In data: Pointer?, flags: Int): Int
         fun mdb_cursor_renew(@In txn: Pointer?, @In cursor: Pointer?): Int
-        fun mdb_cursor_txn(@In cursor: Pointer?): Pointer?
+        fun _mdb_cursor_txn(@In cursor: Pointer?): Pointer?
         fun mdb_dbi_close(@In env: Pointer?, @In dbi: Pointer?)
         fun mdb_dbi_flags(@In txn: Pointer?, @In dbi: Pointer?, @Out flags: IntByReference?): Int
         fun mdb_dbi_open(@In txn: Pointer?, @In name: ByteArray?, flags: Int, @In dbiPtr: Pointer?): Int
@@ -125,7 +125,7 @@ internal class Library {
         fun mdb_get(@In txn: Pointer?, @In dbi: Pointer?, @In key: Pointer?, @Out data: Pointer?): Int
         fun mdb_put(@In txn: Pointer?, @In dbi: Pointer?, @In key: Pointer?, @In data: Pointer?, flags: Int): Int
         fun mdb_reader_check(@In env: Pointer?, @Out dead: IntByReference?): Int
-        fun mdb_reader_list(@In env: Pointer?, @In func: Pointer?, @In ctx: Pointer?): Int
+        fun _mdb_reader_list(@In env: Pointer?, @In func: Pointer?, @In ctx: Pointer?): Int
         fun mdb_set_compare(@In txn: Pointer?, @In dbi: Pointer?, cb: ComparatorCallback?): Int
         fun mdb_set_dupsort(@In txn: Pointer?, @In dbi: Pointer?, cb: ComparatorCallback?): Int
         fun _mdb_set_relctx(@In txn: Pointer?, @In dbi: Pointer?, @In ctx: Pointer?): Int

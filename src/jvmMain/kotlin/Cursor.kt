@@ -1,5 +1,6 @@
 import Library.Companion.LMDB
 import jnr.ffi.Pointer
+import jnr.ffi.byref.NativeLongByReference
 import jnr.ffi.byref.PointerByReference
 
 actual class Cursor(txn: Txn, dbi: Dbi) : AutoCloseable {
@@ -36,6 +37,16 @@ actual class Cursor(txn: Txn, dbi: Dbi) : AutoCloseable {
 
     actual fun deleteDuplicateData() {
         check(LMDB.mdb_cursor_del(ptr, CursorDeleteOption.NO_DUP_DATA.option.toInt()))
+    }
+
+    actual fun countDuplicates(): ULong {
+        val countPtr = NativeLongByReference()
+        check(LMDB.mdb_cursor_count(ptr, countPtr))
+        return countPtr.value.toLong().toULong()
+    }
+    
+    actual fun renew(txn: Txn) {
+        check(LMDB.mdb_cursor_renew(txn.ptr, ptr))
     }
 
     internal actual fun put(key: Val, data: Val, option: CursorPutOption): Triple<Int, Val, Val> {

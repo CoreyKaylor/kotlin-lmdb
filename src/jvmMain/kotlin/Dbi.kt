@@ -3,10 +3,13 @@ import Library.Companion.RUNTIME
 import jnr.ffi.Memory.allocateDirect
 import jnr.ffi.NativeType
 import jnr.ffi.Pointer
+import java.util.concurrent.atomic.AtomicBoolean
 
-actual class Dbi actual constructor(name: String?, tx: Txn, vararg options: DbiOption) {
+actual class Dbi actual constructor(name: String?, tx: Txn, vararg options: DbiOption) : AutoCloseable {
     private val dbiPtr = allocateDirect(RUNTIME, NativeType.ADDRESS)
     internal val ptr: Pointer
+    private val closed = AtomicBoolean(false)
+    private val env = tx.env
 
     init {
         check(LMDB.mdb_dbi_open(tx.ptr, name?.toByteArray(), options.asIterable().toFlags().toInt(), dbiPtr))
@@ -23,5 +26,32 @@ actual class Dbi actual constructor(name: String?, tx: Txn, vararg options: DbiO
     
     actual fun compare(tx: Txn, a: Val, b: Val): Int {
         return LMDB.mdb_cmp(tx.ptr, ptr, a.mdbVal.ptr, b.mdbVal.ptr)
+    }
+    
+    actual fun dupCompare(tx: Txn, a: Val, b: Val): Int {
+        return LMDB.mdb_dcmp(tx.ptr, ptr, a.mdbVal.ptr, b.mdbVal.ptr)
+    }
+    
+    actual fun flags(tx: Txn): Set<DbiOption> {
+        val flagsRef = jnr.ffi.byref.IntByReference()
+        check(LMDB.mdb_dbi_flags(tx.ptr, ptr, flagsRef))
+        val flagsInt = flagsRef.value.toUInt()
+        return DbiOption.values().filter { (flagsInt and it.option) != 0u }.toSet()
+    }
+    
+    /**
+     * Close the database handle. 
+     * 
+     * This call is not mutex protected. Handles should only be closed by
+     * a single thread, and only if no other threads are going to reference
+     * the database handle or one of its cursors any further. Do not close
+     * a handle if an existing transaction has modified its database.
+     * 
+     * Safe to call multiple times; only the first call has an effect.
+     */
+    actual override fun close() {
+        if (closed.compareAndSet(false, true)) {
+            LMDB.mdb_dbi_close(env.ptr, ptr)
+        }
     }
 }

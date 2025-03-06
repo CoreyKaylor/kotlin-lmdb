@@ -5,6 +5,8 @@ expect class Cursor : AutoCloseable {
     internal fun put(key: Val, data: Val, option: CursorPutOption) : Triple<Int, Val, Val>
     fun delete()
     fun deleteDuplicateData()
+    fun countDuplicates(): ULong
+    fun renew(txn: Txn)
     override fun close()
 }
 

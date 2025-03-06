@@ -6,7 +6,7 @@ import jnr.ffi.NativeType
 import jnr.ffi.Pointer
 
 actual class Txn internal actual constructor(env: Env, parent: Txn?, vararg options: TxnOption) : AutoCloseable {
-    private val env: Env
+    val env: Env
     private val txnPtr = allocateDirect(RUNTIME, NativeType.ADDRESS)
     internal val ptr: Pointer
     private val parentTx: Pointer?

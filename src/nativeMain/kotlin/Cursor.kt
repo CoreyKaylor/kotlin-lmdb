@@ -43,6 +43,18 @@ actual class Cursor(txn: Txn, dbi: Dbi) : AutoCloseable {
     actual fun deleteDuplicateData() {
         check(mdb_cursor_del(ptr, CursorDeleteOption.NO_DUP_DATA.option))
     }
+    
+    actual fun countDuplicates(): ULong {
+        memScoped {
+            val countVar = alloc<ULongVar>()
+            check(mdb_cursor_count(ptr, countVar.ptr))
+            return countVar.value
+        }
+    }
+    
+    actual fun renew(txn: Txn) {
+        check(mdb_cursor_renew(txn.ptr, ptr))
+    }
 
     actual override fun close() {
         mdb_cursor_close(ptr)

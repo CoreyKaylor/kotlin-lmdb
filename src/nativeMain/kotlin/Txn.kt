@@ -2,7 +2,7 @@ import TxnState.*
 import kotlinx.cinterop.*
 import lmdb.*
 
-actual class Txn internal actual constructor(private val env: Env, parent: Txn?, vararg options: TxnOption) : AutoCloseable {
+actual class Txn internal actual constructor(val env: Env, parent: Txn?, vararg options: TxnOption) : AutoCloseable {
     private val arena = Arena()
     private val parentTx: CPointer<MDB_txn>?
     internal val ptr: CPointer<MDB_txn>
