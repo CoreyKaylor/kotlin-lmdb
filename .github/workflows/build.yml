@@ -28,7 +28,7 @@ jobs:
           cache: gradle
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@v4
 
       # Install only the basic build tools required for compiling native code
       - name: Install build essentials (Linux)
@@ -54,9 +54,6 @@ jobs:
           key: ${{ runner.os }}-konan-${{ hashFiles('**/*.kts') }}
           restore-keys: ${{ runner.os }}-konan-
 
-      - name: Verify Gradle wrapper
-        uses: gradle/wrapper-validation-action@v2
-      
       - name: Make gradlew executable (Unix)
         if: runner.os != 'Windows'
         run: chmod +x ./gradlew
@@ -74,12 +71,10 @@ jobs:
       - name: Build and test JVM (Linux & macOS)
         if: runner.os != 'Windows'
         run: ./gradlew jvmTest --info
-        continue-on-error: true  # Continue even if tests fail
 
       - name: Build and test JVM (Windows)
         if: runner.os == 'Windows'
         run: .\gradlew.bat jvmTest --info
-        continue-on-error: true  # Continue even if tests fail
 
       # Complete the build process
       - name: Complete build process (Linux & macOS)
