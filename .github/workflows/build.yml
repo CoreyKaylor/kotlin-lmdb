@@ -94,7 +94,7 @@ jobs:
           # Create the DLL from the source files using MinGW GCC
           x86_64-w64-mingw32-gcc -shared -o liblmdb.dll mdb.c midl.c -Wl,--out-implib,liblmdb.lib
           
-          :: Copy to system directory
+          # Copy to system directory
           copy /Y "liblmdb.dll" "C:\Windows\System32\liblmdb.dll"
           
           # Set environment variable for JVM tests
@@ -145,7 +145,7 @@ jobs:
         if: runner.os == 'Windows'
         shell: cmd
         run: |
-          :: Try the full build first
+          # Try the full build first
           .\gradlew.bat build --no-daemon
           if %ERRORLEVEL% neq 0 (
             echo "Full build failed, retrying without JVM tests"
