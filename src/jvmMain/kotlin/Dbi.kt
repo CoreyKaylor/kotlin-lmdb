@@ -20,4 +20,8 @@ actual class Dbi actual constructor(name: String?, tx: Txn, vararg options: DbiO
             mdbStat.f5_ms_entries.get().toULong(), mdbStat.f3_ms_leaf_pages.get().toULong(),
             mdbStat.f4_ms_overflow_pages.get().toULong(), mdbStat.f0_ms_psize.get().toUInt())
     }
+    
+    actual fun compare(tx: Txn, a: Val, b: Val): Int {
+        return LMDB.mdb_cmp(tx.ptr, ptr, a.mdbVal.ptr, b.mdbVal.ptr)
+    }
 }

@@ -24,4 +24,8 @@ actual class Dbi actual constructor(name: String?, private val tx: Txn, vararg o
             pointed.ms_overflow_pages, pointed.ms_psize
         )
     }
+    
+    actual fun compare(tx: Txn, a: Val, b: Val): Int {
+        return mdb_cmp(tx.ptr, dbi, a.mdbVal.ptr, b.mdbVal.ptr)
+    }
 }
