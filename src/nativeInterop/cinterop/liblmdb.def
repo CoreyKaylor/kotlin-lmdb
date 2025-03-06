@@ -1,4 +1,6 @@
-headers = lmdb.h midl.h mdb.c midl.c
+headers = lmdb.h mdb.c midl.c
 package = lmdb
-headerFilter = lmdb.h midl.h
-compilerOpts = -pthread -O2 -g -Wall -Wno-unused-parameter -Wbad-function-cast -Wuninitialized
+
+libraryPaths = libs/linuxX64/liblmdb.so
+libraryPaths = libs/macosArm64/liblmdb.dylib
+libraryPaths = libs/mingwX64/liblmdb.dll

@@ -30,83 +30,37 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      # Build and install LMDB library for Linux
-      - name: Build and install LMDB (Linux)
+      # Configure environment for Linux (for JVM bindings)
+      - name: Configure environment for Linux
         if: runner.os == 'Linux'
         run: |
-          sudo apt-get update
-          sudo apt-get install -y gcc g++ build-essential
-          
-          # Clone and build LMDB
-          git clone https://git.openldap.org/openldap/openldap.git -b LMDB_0.9.33 --depth 1 /tmp/openldap
-          cd /tmp/openldap/libraries/liblmdb
-          make
-          
-          # Install the library
-          sudo cp liblmdb.so /usr/local/lib/
-          sudo cp lmdb.h midl.h /usr/local/include/
+          # Create symbolic link in system library path
+          sudo mkdir -p /usr/local/lib/
+          sudo ln -sf $PWD/src/nativeInterop/cinterop/libs/linuxX64/liblmdb.so /usr/local/lib/liblmdb.so
           sudo ldconfig
           
           # Set environment variable for JVM tests
           echo "JAVA_TOOL_OPTIONS=-Dlmdb.native.lib=liblmdb.so" >> $GITHUB_ENV
 
-      # Build and install LMDB library for macOS
-      - name: Build and install LMDB (macOS)
+      # Configure environment for macOS (for JVM bindings)
+      - name: Configure environment for macOS
         if: runner.os == 'macOS'
         run: |
-          brew install gcc
-          
-          # Clone and build LMDB
-          git clone https://git.openldap.org/openldap/openldap.git -b LMDB_0.9.33 --depth 1 /tmp/openldap
-          cd /tmp/openldap/libraries/liblmdb
-          make
-          
-          # Create dylib file for macOS
-          gcc -dynamiclib -o liblmdb.dylib mdb.o midl.o -install_name /usr/local/lib/liblmdb.dylib
-          
-          # Create directories if they don't exist
-          sudo mkdir -p /usr/local/lib
-          sudo mkdir -p /usr/local/include
-          
-          # Install the library
-          sudo cp liblmdb.dylib /usr/local/lib/
-          sudo cp lmdb.h midl.h /usr/local/include/
+          # Create symbolic link in system library path
+          sudo mkdir -p /usr/local/lib/
+          sudo ln -sf $PWD/src/nativeInterop/cinterop/libs/macosArm64/liblmdb.dylib /usr/local/lib/liblmdb.dylib
           
           # Set environment variable for JVM tests
           echo "JAVA_TOOL_OPTIONS=-Dlmdb.native.lib=liblmdb.dylib" >> $GITHUB_ENV
 
-      # Build and install LMDB library for Windows
-      - name: Build and install LMDB (Windows)
+      # Configure environment for Windows (for JVM bindings)
+      - name: Configure environment for Windows
         if: runner.os == 'Windows'
         shell: bash
         run: |
-          # Install MSYS2 with pacman and mingw-w64
-          choco install msys2 -y
-          
-          # Install MinGW-w64 GCC through MSYS2
-          /c/msys64/usr/bin/pacman.exe -Sy --noconfirm mingw-w64-x86_64-gcc
-          
-          # Add MSYS2 binaries to PATH
-          export PATH="/c/msys64/mingw64/bin:$PATH"
-          
-          # Clone LMDB
-          git clone https://git.openldap.org/openldap/openldap.git -b LMDB_0.9.33 --depth 1 /c/openldap
-          cd /c/openldap/libraries/liblmdb
-          
-          # Check GCC availability
-          echo "GCC location:"
-          which gcc
-          
-          # Build with GCC from MSYS2
-          /c/msys64/mingw64/bin/gcc.exe -shared -o liblmdb.dll mdb.c midl.c -Wl,--out-implib,liblmdb.lib
-          
-          # Create temp directory for DLL
-          mkdir -p /c/liblmdb
-          cp liblmdb.dll /c/liblmdb/
-          
-          # Set environment variables for JVM tests
-          echo "JAVA_TOOL_OPTIONS=-Dlmdb.native.lib=/c/liblmdb/liblmdb.dll" >> $GITHUB_ENV
-          echo "PATH=/c/liblmdb:$PATH" >> $GITHUB_ENV
+          # Add the DLL directory to PATH
+          echo "JAVA_TOOL_OPTIONS=-Dlmdb.native.lib=$PWD/src/nativeInterop/cinterop/libs/mingwX64/liblmdb.dll" >> $GITHUB_ENV
+          echo "PATH=$PWD/src/nativeInterop/cinterop/libs/mingwX64:$PATH" >> $GITHUB_ENV
 
       - name: Cache Kotlin Native compiler
         uses: actions/cache@v4

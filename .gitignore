@@ -9,7 +9,7 @@ out
 *.iml
 .directory
 local.properties
-src/nativeInterop/cinterop/lmdb/
+lmdb/lmdb/
 
 .DS_Store
 .externalNativeBuild

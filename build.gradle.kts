@@ -37,6 +37,7 @@ kotlin {
         compilations.getByName("main") {
             cinterops {
                 val liblmdb by creating {
+                    defFile(project.file("src/nativeInterop/cinterop/liblmdb.def"))
                     includeDirs("src/nativeInterop/cinterop/c/")
                 }
             }
