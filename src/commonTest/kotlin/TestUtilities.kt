@@ -24,3 +24,15 @@ fun createRandomTestEnv(open: Boolean = true, mapSize: ULong? = null, maxDatabas
     }
     return env
 }
+
+/**
+ * Platform-specific function to register a custom comparer
+ * This handles the differences between JVM and Native implementations
+ */
+expect fun registerCustomComparer(slot: ValComparer, compareFunction: ValCompare)
+
+/**
+ * Platform-specific function to clear all custom comparers
+ * This handles the differences between JVM and Native implementations
+ */
+expect fun clearCustomComparers()
