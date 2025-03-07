@@ -1,9 +1,13 @@
 plugins {
     kotlin("multiplatform") version "2.1.10"
+    id("org.jetbrains.dokka") version "1.9.10"
+    id("maven-publish")
+    id("signing")
 }
 
 group = "com.github.kotlin-lmdb"
-version = "1.0-SNAPSHOT"
+version = "0.1.0-SNAPSHOT"
+description = "Kotlin Multiplatform library for LMDB key-value store"
 
 repositories {
     mavenCentral()
@@ -73,8 +77,85 @@ kotlin {
         }
     }
 }
-tasks.withType<Test> {
-    this.testLogging {
-        this.showStandardStreams = true
+tasks {
+    withType<Test> {
+        testLogging {
+            showStandardStreams = true
+        }
+    }
+    
+    // Create javadoc jar for Maven Central requirements
+    val javadocJar by creating(Jar::class) {
+        group = "documentation"
+        archiveClassifier.set("javadoc")
+        from(layout.buildDirectory.dir("dokka/html"))
+        dependsOn("dokkaHtml")
+    }
+}
+
+// Configure publishing
+publishing {
+    publications {
+        withType<MavenPublication> {
+            // Javadoc is required by Maven Central
+            artifact(tasks.named("javadocJar"))
+            
+            // Configure POM required by Maven Central
+            pom {
+                name.set("kotlin-lmdb")
+                // The artifactId is automatically set by Kotlin MPP plugin
+                description.set(project.description)
+                url.set("https://github.com/CoreyKaylor/kotlin-lmdb")
+                
+                licenses {
+                    license {
+                        name.set("OpenLDAP Public License")
+                        url.set("https://www.openldap.org/software/release/license.html")
+                        distribution.set("repo")
+                    }
+                }
+                
+                developers {
+                    developer {
+                        id.set("coreykaylor")
+                        name.set("Corey Kaylor")
+                        email.set("corey@coreykaylor.com")
+                    }
+                }
+                
+                scm {
+                    connection.set("scm:git:git://github.com/CoreyKaylor/kotlin-lmdb.git")
+                    developerConnection.set("scm:git:ssh://github.com/CoreyKaylor/kotlin-lmdb.git")
+                    url.set("https://github.com/CoreyKaylor/kotlin-lmdb")
+                }
+            }
+        }
+    }
+    
+    repositories {
+        maven {
+            name = "sonatype"
+            val releasesRepoUrl = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
+            val snapshotsRepoUrl = uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
+            url = if (version.toString().endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl
+            
+            credentials {
+                username = findProperty("ossrhUsername") as String? ?: System.getenv("OSSRH_USERNAME") 
+                password = findProperty("ossrhPassword") as String? ?: System.getenv("OSSRH_PASSWORD")
+            }
+        }
+    }
+}
+
+// Configure signing
+signing {
+    val signingKey = findProperty("signing.key") as String? ?: System.getenv("SIGNING_KEY")
+    val signingPassword = findProperty("signing.password") as String? ?: System.getenv("SIGNING_PASSWORD")
+    
+    if (signingKey != null && signingPassword != null) {
+        useInMemoryPgpKeys(signingKey, signingPassword)
+        sign(publishing.publications)
+    } else {
+        isRequired = false // Don't require signing for local builds
     }
 }

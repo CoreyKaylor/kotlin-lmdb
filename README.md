@@ -1,6 +1,8 @@
 # kotlin-lmdb
 
 [![Build and Test](https://github.com/CoreyKaylor/kotlin-lmdb/actions/workflows/build.yml/badge.svg)](https://github.com/CoreyKaylor/kotlin-lmdb/actions/workflows/build.yml)
+[![Maven Central](https://img.shields.io/maven-central/v/com.github.kotlin-lmdb/kotlin-lmdb.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.github.kotlin-lmdb%22)
+[![License](https://img.shields.io/badge/License-OpenLDAP-blue.svg)](https://www.openldap.org/software/release/license.html)
 
 A high-performance, cross-platform Kotlin library for OpenLDAP's Lightning Memory-Mapped Database (LMDB).
 
@@ -16,6 +18,32 @@ kotlin-lmdb provides a type-safe, idiomatic Kotlin API for LMDB, one of the fast
 - **Transactional**: Fully ACID-compliant with robust transaction support
 - **Consistent API**: Unified Kotlin API regardless of platform
 - **Type Safety**: Leverages Kotlin's type system for safer database operations
+
+## Installation
+
+### Gradle (Kotlin DSL)
+
+```kotlin
+kotlin {
+    sourceSets {
+        val commonMain by getting {
+            dependencies {
+                implementation("com.github.kotlin-lmdb:kotlin-lmdb:0.1.0")
+            }
+        }
+    }
+}
+```
+
+### Maven
+
+```xml
+<dependency>
+  <groupId>com.github.kotlin-lmdb</groupId>
+  <artifactId>kotlin-lmdb</artifactId>
+  <version>0.1.0</version>
+</dependency>
+```
 
 ## Getting Started
 
