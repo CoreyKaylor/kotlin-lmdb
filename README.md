@@ -1,8 +1,15 @@
 # kotlin-lmdb
 
-[![Build and Test](https://github.com/CoreyKaylor/kotlin-lmdb/actions/workflows/build.yml/badge.svg)](https://github.com/CoreyKaylor/kotlin-lmdb/actions/workflows/build.yml)
-[![Maven Central](https://img.shields.io/maven-central/v/com.github.kotlin-lmdb/kotlin-lmdb.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.github.kotlin-lmdb%22)
-[![License](https://img.shields.io/badge/License-OpenLDAP-blue.svg)](https://www.openldap.org/software/release/license.html)
+<div>
+  <img src="kotlin-lmdb.png" alt="kotlin-lmdb logo" width="200" align="left" style="margin-right: 10px"/>
+  <p>
+    <a href="https://github.com/CoreyKaylor/kotlin-lmdb/actions/workflows/build.yml"><img src="https://github.com/CoreyKaylor/kotlin-lmdb/actions/workflows/build.yml/badge.svg" alt="Build and Test"></a>
+    <a href="https://search.maven.org/search?q=g:%22com.github.kotlin-lmdb%22"><img src="https://img.shields.io/maven-central/v/com.github.kotlin-lmdb/kotlin-lmdb.svg?label=Maven%20Central" alt="Maven Central"></a>
+    <a href="https://www.openldap.org/software/release/license.html"><img src="https://img.shields.io/badge/License-OpenLDAP-blue.svg" alt="License"></a>
+  </p>
+</div>
+
+<br clear="all" />
 
 A high-performance, cross-platform Kotlin library for OpenLDAP's Lightning Memory-Mapped Database (LMDB).
 
