@@ -109,7 +109,7 @@ publishing {
                 name.set("kotlin-lmdb")
                 // The artifactId is automatically set by Kotlin MPP plugin
                 description.set(project.description)
-                url.set("https://github.com/CoreyKaylor/kotlin-lmdb")
+                url.set("https://github.com/kotlin-lmdb/kotlin-lmdb")
                 
                 licenses {
                     license {
@@ -128,9 +128,9 @@ publishing {
                 }
                 
                 scm {
-                    connection.set("scm:git:git://github.com/CoreyKaylor/kotlin-lmdb.git")
-                    developerConnection.set("scm:git:ssh://github.com/CoreyKaylor/kotlin-lmdb.git")
-                    url.set("https://github.com/CoreyKaylor/kotlin-lmdb")
+                    connection.set("scm:git:git://github.com/kotlin-lmdb/kotlin-lmdb.git")
+                    developerConnection.set("scm:git:ssh://github.com/kotlin-lmdb/kotlin-lmdb.git")
+                    url.set("https://github.com/kotlin-lmdb/kotlin-lmdb")
                 }
             }
         }
