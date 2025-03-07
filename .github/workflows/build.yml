@@ -59,7 +59,7 @@ jobs:
         shell: bash
         run: |
           # Add the DLL directory to PATH
-          echo "JAVA_TOOL_OPTIONS=-Dlmdb.native.lib=$PWD/src/nativeInterop/cinterop/libs/mingwX64/liblmdb.dll" >> $GITHUB_ENV
+          echo "JAVA_TOOL_OPTIONS=-Dlmdb.native.lib=$PWD/src/nativeInterop/cinterop/libs/mingwX64/lmdb.dll" >> $GITHUB_ENV
           echo "PATH=$PWD/src/nativeInterop/cinterop/libs/mingwX64:$PATH" >> $GITHUB_ENV
 
       - name: Cache Kotlin Native compiler
