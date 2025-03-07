@@ -2,14 +2,49 @@ name: Build and Test
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
+      - '**' # This will run on all branches
+    paths-ignore:
+      - '**.md' # Ignore markdown files (like README.md)
+      - 'lmdb/**' # Ignore changes to the lmdb directory
+      - '.gitignore'
+      - 'LICENSE'
+      - 'docs/**'
   pull_request:
-    branches: [ main ]
-  workflow_dispatch:
+    branches:
+      - main
+    paths-ignore:
+      - '**.md' # Ignore markdown files (like README.md)
+      - 'lmdb/**' # Ignore changes to the lmdb directory
+      - '.gitignore'
+      - 'LICENSE'
+      - 'docs/**'
+  workflow_dispatch: # Manual trigger
 
 jobs:
+  # Check if we should run the workflow based on changes
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.filter.outputs.src_changed }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            src_changed:
+              - 'src/**'
+              - 'build.gradle.kts'
+              - 'gradle.properties'
+              - 'settings.gradle.kts'
+              - '.github/workflows/**'
+  
   build:
     name: Build and Test on ${{ matrix.os }}
+    needs: changes
+    if: ${{ needs.changes.outputs.should_run == 'true' || github.event_name == 'workflow_dispatch' }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -69,12 +104,18 @@ jobs:
           # Show the file exists for debugging
           ls -la /c/lmdb_lib/
 
-      - name: Cache Kotlin Native compiler
+      - name: Cache Kotlin Native compiler and Gradle dependencies
         uses: actions/cache@v4
         with:
-          path: ~/.konan
-          key: ${{ runner.os }}-konan-${{ hashFiles('**/*.kts') }}
-          restore-keys: ${{ runner.os }}-konan-
+          path: |
+            ~/.konan
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-konan-gradle-${{ hashFiles('**/*.kts', 'gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-konan-gradle-
+            ${{ runner.os }}-konan-
+            ${{ runner.os }}-
 
       - name: Make gradlew executable (Unix)
         if: runner.os != 'Windows'
@@ -130,3 +171,31 @@ jobs:
             **/build/reports/tests/
             **/build/test-results/
           retention-days: 7
+          
+      - name: Test Summary
+        uses: test-summary/action@v2
+        if: always()
+        with:
+          paths: "**/build/test-results/**/TEST-*.xml"
+          show: "fail, skip"
+          
+      - name: Set Build Status Badge (Unix)
+        if: github.ref == 'refs/heads/main' && always() && runner.os != 'Windows'
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "BUILD_STATUS=Passing" >> $GITHUB_ENV
+          else
+            echo "BUILD_STATUS=Failing" >> $GITHUB_ENV
+          fi
+          echo "Build Status: ${{ env.BUILD_STATUS }}"
+          
+      - name: Set Build Status Badge (Windows)
+        if: github.ref == 'refs/heads/main' && always() && runner.os == 'Windows' 
+        shell: pwsh
+        run: |
+          if ("${{ job.status }}" -eq "success") {
+            echo "BUILD_STATUS=Passing" >> $env:GITHUB_ENV
+          } else {
+            echo "BUILD_STATUS=Failing" >> $env:GITHUB_ENV
+          }
+          echo "Build Status: ${{ env.BUILD_STATUS }}"
