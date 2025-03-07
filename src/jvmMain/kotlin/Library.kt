@@ -16,6 +16,8 @@ import java.util.*
 internal class Library {
     companion object {
         const val LMDB_NATIVE_LIB_PROP = "lmdb.native.lib"
+        private const val LMDB_DEBUG_PROP = "lmdb.debug"
+        private const val LIB_NAME = "lmdb"
 
         val LMDB: Lmdb
         val RUNTIME: Runtime
@@ -24,19 +26,76 @@ internal class Library {
         val SHOULD_USE_LIB = Objects.nonNull(
             System.getProperty(LMDB_NATIVE_LIB_PROP)
         )
-        private const val LIB_NAME = "lmdb"
+        val DEBUG = Objects.nonNull(System.getProperty(LMDB_DEBUG_PROP))
 
         init {
-            val libToLoad = if (SHOULD_USE_LIB) {
-                System.getProperty(LMDB_NATIVE_LIB_PROP)
-            } else {
-                Platform.getNativePlatform().mapLibraryName(LIB_NAME)
+            val libToLoad: String
+            val isWindows = Platform.getNativePlatform().os == Platform.OS.WINDOWS
+            
+            try {
+                if (SHOULD_USE_LIB) {
+                    // Use explicitly specified library path
+                    libToLoad = System.getProperty(LMDB_NATIVE_LIB_PROP)
+                    if (DEBUG) println("[LMDB] Using specified library: $libToLoad")
+                } else {
+                    // Auto-detect library name
+                    libToLoad = Platform.getNativePlatform().mapLibraryName(LIB_NAME)
+                    if (DEBUG) println("[LMDB] Auto-detected library name: $libToLoad")
+                }
+                
+                // Create a loader with diagnostic capability
+                val loader = LibraryLoader.create(Lmdb::class.java)
+                    .searchDefault()
+                
+                // On Windows, try multiple naming patterns
+                if (isWindows) {
+                    try {
+                        if (DEBUG) println("[LMDB] Attempting to load: $libToLoad")
+                        if (SHOULD_USE_LIB) {
+                            // Try loading from full path
+                            val file = java.io.File(libToLoad)
+                            if (file.exists()) {
+                                if (DEBUG) println("[LMDB] File exists at specified path")
+                                // Load file from absolute path
+                                System.load(file.absolutePath)
+                                // Now use LibraryLoader with default search to find the loaded library
+                                LMDB = loader.load(LIB_NAME)
+                            } else {
+                                throw UnsatisfiedLinkError("Library file not found at: ${file.absolutePath}")
+                            }
+                        } else {
+                            LMDB = loader.load(libToLoad)
+                        }
+                    } catch (e: Exception) {
+                        if (DEBUG) {
+                            println("[LMDB] Loading failed: ${e.message}")
+                            println("[LMDB] Search paths: ${System.getProperty("java.library.path")}")
+                        }
+                        throw e
+                    }
+                } else {
+                    // Regular loading for non-Windows platforms
+                    if (DEBUG) println("[LMDB] Loading library: $libToLoad")
+                    LMDB = loader.load(libToLoad)
+                }
+                
+                RUNTIME = Runtime.getRuntime(LMDB)
+                MEMORY = RUNTIME.memoryManager
+                
+                if (DEBUG) println("[LMDB] Successfully loaded library")
+            } catch (e: Exception) {
+                val errorMsg = buildString {
+                    append("Failed to load LMDB native library. ")
+                    append("Please ensure the library is in one of the following locations:\n")
+                    append("- In the system library path\n")
+                    append("- In the java.library.path (${System.getProperty("java.library.path")})\n")
+                    append("- Specified via -Dlmdb.native.lib=/path/to/library\n\n")
+                    append("Operating System: ${System.getProperty("os.name")}\n")
+                    append("Architecture: ${System.getProperty("os.arch")}\n")
+                    append("Error: ${e.message}")
+                }
+                throw UnsatisfiedLinkError(errorMsg)
             }
-            LMDB = LibraryLoader.create(Lmdb::class.java)
-                .searchDefault()
-                .load(libToLoad)
-            RUNTIME = Runtime.getRuntime(LMDB)
-            MEMORY = RUNTIME.memoryManager
         }
     }
 

@@ -58,9 +58,16 @@ jobs:
         if: runner.os == 'Windows'
         shell: bash
         run: |
-          # Add the DLL directory to PATH
-          echo "JAVA_TOOL_OPTIONS=-Dlmdb.native.lib=$PWD/src/nativeInterop/cinterop/libs/mingwX64/lmdb.dll" >> $GITHUB_ENV
-          echo "PATH=$PWD/src/nativeInterop/cinterop/libs/mingwX64:$PATH" >> $GITHUB_ENV
+          # Copy the DLL to a Windows-friendly path avoiding bash path issues
+          mkdir -p /c/lmdb_lib
+          cp $PWD/src/nativeInterop/cinterop/libs/mingwX64/lmdb.dll /c/lmdb_lib/
+          
+          # Enable debug mode and point to absolute Windows path
+          echo "JAVA_TOOL_OPTIONS=-Dlmdb.native.lib=C:/lmdb_lib/lmdb.dll -Dlmdb.debug=true" >> $GITHUB_ENV
+          echo "PATH=/c/lmdb_lib:$PATH" >> $GITHUB_ENV
+          
+          # Show the file exists for debugging
+          ls -la /c/lmdb_lib/
 
       - name: Cache Kotlin Native compiler
         uses: actions/cache@v4
