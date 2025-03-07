@@ -16,19 +16,40 @@ actual class Cursor(txn: Txn, dbi: Dbi) : AutoCloseable {
     internal actual fun get(option: CursorOption) : Triple<Int,Val,Val> {
         val key = Val.output()
         val data = Val.output()
-        val result = mdb_cursor_get(ptr, key.mdbVal.ptr, data.mdbVal.ptr, MDB_cursor_op.byValue(option.option))
+        val result = mdb_cursor_get(ptr, key.mdbVal.ptr, data.mdbVal.ptr, getMdbCursorOp(option))
         return buildReadResult(result, key, data)
     }
 
     internal actual fun get(key: Val, option: CursorOption): Triple<Int, Val, Val> {
         val mdbData = Val.output()
-        val result = mdb_cursor_get(ptr, key.mdbVal.ptr, mdbData.mdbVal.ptr, MDB_cursor_op.byValue(option.option))
+        val result = mdb_cursor_get(ptr, key.mdbVal.ptr, mdbData.mdbVal.ptr, getMdbCursorOp(option))
         return buildReadResult(result, key, mdbData)
     }
 
     internal actual fun get(key: Val, data: Val, option: CursorOption): Triple<Int, Val, Val> {
-        val result = mdb_cursor_get(ptr, key.mdbVal.ptr, data.mdbVal.ptr, MDB_cursor_op.byValue(option.option))
+        val result = mdb_cursor_get(ptr, key.mdbVal.ptr, data.mdbVal.ptr, getMdbCursorOp(option))
         return buildReadResult(result, key, data)
+    }
+    
+    private fun getMdbCursorOp(option: CursorOption): MDB_cursor_op = when(option) {
+        CursorOption.FIRST -> MDB_cursor_op.MDB_FIRST
+        CursorOption.FIRST_DUP -> MDB_cursor_op.MDB_FIRST_DUP
+        CursorOption.GET_BOTH -> MDB_cursor_op.MDB_GET_BOTH
+        CursorOption.GET_BOTH_RANGE -> MDB_cursor_op.MDB_GET_BOTH_RANGE
+        CursorOption.GET_CURRENT -> MDB_cursor_op.MDB_GET_CURRENT
+        CursorOption.GET_MULTIPLE -> MDB_cursor_op.MDB_GET_MULTIPLE
+        CursorOption.LAST -> MDB_cursor_op.MDB_LAST
+        CursorOption.LAST_DUP -> MDB_cursor_op.MDB_LAST_DUP
+        CursorOption.NEXT -> MDB_cursor_op.MDB_NEXT
+        CursorOption.NEXT_DUP -> MDB_cursor_op.MDB_NEXT_DUP
+        CursorOption.NEXT_MULTIPLE -> MDB_cursor_op.MDB_NEXT_MULTIPLE
+        CursorOption.NEXT_NODUP -> MDB_cursor_op.MDB_NEXT_NODUP
+        CursorOption.PREV -> MDB_cursor_op.MDB_PREV
+        CursorOption.PREV_DUP -> MDB_cursor_op.MDB_PREV_DUP
+        CursorOption.PREV_NODUP -> MDB_cursor_op.MDB_PREV_NODUP
+        CursorOption.SET -> MDB_cursor_op.MDB_SET
+        CursorOption.SET_KEY -> MDB_cursor_op.MDB_SET_KEY
+        CursorOption.SET_RANGE -> MDB_cursor_op.MDB_SET_RANGE
     }
 
     internal actual fun put(key: Val, data: Val, option: CursorPutOption): Triple<Int, Val, Val> {

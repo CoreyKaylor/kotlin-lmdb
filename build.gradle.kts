@@ -17,6 +17,7 @@ repositories {
 kotlin {
     compilerOptions {
         freeCompilerArgs.add("-Xexpect-actual-classes")
+        optIn.add("kotlin.RequiresOptIn")
     }
     jvmToolchain(21)
     jvm {
@@ -55,6 +56,7 @@ kotlin {
                 implementation(kotlin("test"))
                 implementation("org.jetbrains.kotlinx:kotlinx-io-core:0.5.4")
             }
+            languageSettings.optIn("kotlinx.io.core.ExperimentalIO")
         }
         val jvmMain by getting {
             dependencies {
@@ -64,13 +66,15 @@ kotlin {
         }
         val jvmTest by getting
 
-        val nativeMain by getting
-        val nativeTest by getting
+        val nativeMain by getting {
+            languageSettings.optIn("kotlinx.cinterop.ExperimentalForeignApi")
+        }
+        val nativeTest by getting {
+            languageSettings.optIn("kotlinx.cinterop.ExperimentalForeignApi")
+        }
 
         all {
             languageSettings.apply {
-                optIn("kotlinx.cinterop.ExperimentalForeignApi")
-                optIn("kotlinx.io.core.ExperimentalIO")
                 optIn("kotlin.uuid.ExperimentalUuidApi")
                 optIn("kotlin.experimental.ExperimentalNativeApi")
             }
@@ -119,7 +123,7 @@ publishing {
                     developer {
                         id.set("coreykaylor")
                         name.set("Corey Kaylor")
-                        email.set("corey@coreykaylor.com")
+                        email.set("corey@kaylors.net")
                     }
                 }
                 
